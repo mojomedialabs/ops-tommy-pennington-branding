@@ -1,0 +1,287 @@
+<html>
+<head>
+	<title>{Title}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<style type="text/css">
+		a, a:visited {
+			color: #591f00;
+			text-decoration: none;
+		}
+
+		a:hover, a:focus {
+			color: #4d1b00;
+			outline: none;
+			text-decoration: underline;
+		}
+
+		a:active {
+			color: #78482f;
+		}
+
+		#products tr:nth-child(2n+1) {
+			background: #ededed;
+		}
+	</style>
+</head>
+<body style="background-color: #86d5ed; margin: 0; padding: 0;">
+	<table style="background-color: #86d5ed; border: 0; width: 100%;">
+		<tr>
+			<td>
+				<table align="center" style="background-color: #ffffff; border: 0; width: 600px;">
+					<tr align="center">
+						<td>
+							<a href="http://marketing-candy.com/"><img src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/logo.png" alt="Marketing Candy Logo" style="height: 82px; width: 267px;" title="Marketing Candy Website" /></a>
+						</td>
+					</tr>
+					<tr align="center">
+						<td>
+							<h1 style="color: #009fce; font-size: 27px;">Thank you for ordering from<br /><span style="font-style: italic;">Marketing Candy</span>!</h1>
+						</td>
+					</tr>
+					<tr align="center">
+						<td style="padding-left: 50px; padding-right: 50px;">
+							{HelpText}
+						</td>
+					</tr>
+					<!--TabTableStart-->
+					<!--ORDERS-->
+					<tr>
+						<td style="padding-top: 20px;">
+							<table style="border: 0; width: 600px;">
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Order Number:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{CartId}
+									</td>
+								</tr>
+								<!--ReturnCard-->
+								<!--CreditCardOrder-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Bank Reference:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{Description}
+									</td>
+								</tr>
+								<!--/CreditCardOrder-->
+								<!--/ReturnCard-->
+								<!--CostCentreName-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Client:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{CostCentreName}
+									</td>
+								</tr>
+								<!--/CostCentreName-->
+								<!--PONumber-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>PO Number:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{PONumber}
+									</td>
+								</tr>
+								<!--/PONumber-->
+								<!--NameFirstName-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Employee Name:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{NameFirstName} {NameSurname}
+									</td>
+								</tr>
+								<!--/NameFirstName-->
+								<!--ContactNumbersPhone-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Phone Number:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{ContactNumbersPhone}
+									</td>
+								</tr>
+								<!--/ContactNumbersPhone-->
+								<!--Email-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Email:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{Email}
+									</td>
+								</tr>
+								<!--/Email-->
+								<!--DeliveryDetails-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Deliver To:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{Address}
+									</td>
+								</tr>
+								<!--/DeliveryDetails-->
+								<!--BillingDetails-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Bill To:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{BillingAddress}
+									</td>
+								</tr>
+								<!--/BillingDetails-->
+							</table>
+						<td>
+					</tr>
+					<tr valign="top">
+						<td style="border-collapse: collapse; padding-left: 50px; padding-right: 50px; padding-top: 20px;">
+							<table id="products" style="width: 500px;">
+								<tr>
+									<th style="text-align: left; width: 17%;">Item #</th>
+									<th style="text-align: left; width: 12%;">Date</th>
+									<th style="text-align: left; width: 13%;">Quantity</th>
+									<th style="text-align: left; width: 47%;">Name</th>
+									<!--COST--><th style="text-align: left; width: 11%;">Cost</th><!--/COST-->
+									<!--Delivery--><th style="text-align: left; width: 10%;">Delivery</th><!--/Delivery-->
+									<!--PrinterOnly--><!--/PrinterOnly-->
+								</tr>
+								<!--ROW-->
+								<tr valign="top">
+									<td style="width: 18%;">{OrderNumber}</td>
+									<td style="width: 11%;">{Date}</td>
+									<td style="width: 13%;">{Quantity}</td>
+									<td style="width: 47%;">{TemplateName}<!--HiResPDFLink--><!--ExtraOrderFields--></td>
+									<!--COST--><td style="width: 11%;">{Cost}</td><!--/COST-->
+									<!--Delivery--><td style="width: 10%;">{Address}</td><!--/Delivery-->
+								</tr>
+								<!--Postage-->
+								<tr>
+									<td style="text-align: right; width: 400px;">Postage</td>
+									<!--COST--><td style="width: 100px;">{Postage}</td><!--/COST-->
+									<td style="width: 100px;">&nbsp;</td>
+									<!--PrinterOnly--><!--/PrinterOnly-->
+								</tr>
+								<!--/Postage-->
+								<!--/ROW-->
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-top: 20px;">
+							<table style="width: 600px;">
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Cost of Items:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{totalcost}
+									</td>
+								</tr>
+								<!--HANDLING-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Handling:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{handling}
+									</td>
+								</tr>
+								<!--/HANDLING-->
+								<!--FREIGHT-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>{FreightCaption}:</strong><!--CostCentreCostRuleCaption--><br />{CostCentreCostRuleCaption}<!--/CostCentreCostRuleCaption-->
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{freight}
+									</td>
+								</tr>
+								<!--/FREIGHT-->
+								<!--FREIGHTHANDLING-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>{FreightCaption}:</strong><!--CostCentreCostRuleCaption--><br />{CostCentreCostRuleCaption}<!--/CostCentreCostRuleCaption-->
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{freighthandling}
+									</td>
+								</tr>
+								<!--/FREIGHTHANDLING-->
+								<!--DISCOUNT-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Discount:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										-{DiscountPrice}
+									</td>
+								</tr>
+								<!--/DISCOUNT-->
+								<!--TAX-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Total excl. {TaxLabel}:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{subtotal}
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>{TaxLabel}:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{tax}
+									</td>
+								</tr>
+								<!--/TAX-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Total {taxinc} <!--TAXLABEL-->{TaxLabel}<!--/TAXLABEL-->:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{total}
+									</td>
+								</tr>
+								<!--Paid-->
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Total Payment:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{total}
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 50px; width: 250px;">
+										<strong>Balance Due:</strong>
+									</td>
+									<td style="padding-right: 50px; text-align: right; width: 250px;">
+										{CurrencySymbol}0.00
+									</td>
+								</tr>
+								<!--/Paid-->
+							</table>
+						<td>
+					</tr>
+					<!--/ORDERS-->
+					<!--TabTableEnd-->
+					<tr>
+						<td style="padding-top: 20px; text-align: center;">
+							If you have any questions, comments or concerns give us a call at 1-972-815-1080 or email us at <a href="mailto:orders@teamrgc.com">orders@teamrgc.com</a>.
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

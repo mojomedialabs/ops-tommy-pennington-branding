@@ -1,0 +1,120 @@
+<SCRIPT language="JavaScript">
+var blnOrder = false
+
+function checkOrder()
+{
+
+	if (blnOrder)
+	{
+		return confirm("Are you sure you want to Order your stationery now?");
+	}
+}
+
+
+function openWin(strURL)
+{
+    var winCurrent
+	winCurrent = window.open(strURL, "", "width=600,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+	winCurrent.focus(); 
+}
+
+function initialiseScreen()
+{
+	getListInfo('{listid}', '');
+	
+	//<!--SEEDS-->
+	getListInfo('{seedlistid}', 1);
+	//<!--/SEEDS-->
+	
+	CheckApproverEmail();
+	if (document.getElementById("spnInsertsList"))
+	{
+		getInsertsInfo();
+	}
+}
+function showhelp(strHeader, strHelp,evt, blnShow) {
+  
+  var tempX = 0;
+  var tempY = 0;
+  var strVis="hidden";
+  var IE = document.all?true:false;
+  var hp = document.getElementById("help_popup").style;
+
+  document.getElementById("help_header").innerHTML = "";
+  document.getElementById("help_body").innerHTML =  "";
+  hp.visibility = "hidden";
+
+
+  if (blnShow)
+  {
+    strVis = "visible";
+    if (IE)
+    {
+      tempX = event.clientX + document.body.scrollLeft;
+      tempY = event.clientY + document.body.scrollTop;
+    }
+    else
+    {
+      tempX = evt.pageX;
+      tempY = evt.pageY;
+    }
+
+
+    hp.top = tempY-30;
+    hp.left = tempX+20;
+
+    document.getElementById("help_header").innerHTML = strHeader;
+    document.getElementById("help_body").innerHTML = strHelp;
+  }  
+
+    hp.visibility = strVis;
+
+}
+
+	function functionOnLoad(){
+		initialiseScreen();
+	}
+</SCRIPT>
+
+<div style="visibility: hidden; position: absolute; filter:alpha(opacity=85); -moz-opacity:0.85; opacity: 0.85; z-index: 1; top: 5px; left: 5px; width:200px;" id="help_popup"> 
+<IFRAME id="frTest" style="z-index:-1;width:200px;height:200;position:absolute;top:0;left:0;display:inline;" frameborder=0 scrolling=no marginwidth=0 src="" marginheight=0></iframe>
+  <table class="bordertable" width="200">
+    <tr><td class=bordertableheader id="help_header"></td></tr>
+    <tr><td id="help_body"></td></tr>
+  </table>
+</div>
+<!--TabTableStart-->
+            <table border="0" cellspacing="0" cellpadding="0" class=wrapper>
+              <tr>
+                <td valign="top" valign=top>
+                   <table border=0 cellpadding=1 cellspacing=1>
+                     <tr>
+                         <td valign=top>
+                           
+                             <form action="Step5Edit.asp" method="POST">
+                             <input type="hidden" name="torder3" id="torder3" value="{torder}" />
+                         <!--HiddenVariables-->
+                         <!--HiddenEVariables-->
+                         <table border="0" cellpadding="1" cellspacing="0" class=bordertable>
+<!--EditArtWork-->
+                             <tr><td class=bordertableheader>
+								<!--EditArtworkDetailsButton-->
+									<input type=submit value="Edit Artwork Details">
+								<!--/EditArtworkDetailsButton-->&nbsp;
+							 </td></tr>
+<!--/EditArtWork-->
+                             <!--fthumb--><tr><td>{FrontFile}</td></tr><!--/fthumb-->
+			     <!--bthumb--><tr><td>{BackFile}</td></tr><!--/bthumb-->
+
+                             
+                           </table>
+                           </form>
+                         </td>
+                         <td valign=top width="20"><img src="images/spacer.gif" border="0" width="20"></td>
+                         <td valign=top>!user/proofRHS.htm!</td>
+                     </tr>
+                   </table>
+                 </td>
+               </tr>
+             </table><br>
+         <!--TabTableEnd-->

@@ -1,0 +1,103 @@
+<SCRIPT LANGUAGE="JAVASCRIPT">
+
+  function deleteOrder(strURL)
+  {
+    	if (confirm("Are you sure you want to delete this order?"))
+    	{
+    		window.location = strURL
+    	}
+  }
+
+
+function openWin(strURL)
+{
+    var winCurrent
+	winCurrent = window.open(strURL, "", "width=780,height=480,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+	winCurrent.focus(); 
+}
+function wopen(pageURL, title,w,h) {
+var left = (screen.width/2)-(w/2);
+var top = (screen.height/2)-(h/2);
+var targetWin = window.open (pageURL, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+} 
+function openTracking(strURL)
+{
+    var winCurrent
+	winCurrent = window.open(strURL, "", "width=500,height=480,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+	winCurrent.focus(); 
+}
+
+</SCRIPT>
+<!--search-->
+     <form method=post id=form1 name=form1>
+      <TABLE border="0" cellpadding="0" cellspacing="0" class=wrapper width="100%">
+      <TBODY>
+        <TR>
+          <TD align=left valign="top" class=DataTDGrey nowrap><b>Search All Orders for:&nbsp;</b>
+            <input class="textboxtext" name="searchvalue" value="{searchval}">&nbsp;by&nbsp;
+          <select class="textboxtext" name='searchorder'>
+              <!--CART--><option value="0">Cart #</option><!--/CART--><option value="1">Order #</option><!--PO--><option value="2">PO Number</option><!--/PO-->
+              <option value="3">Artwork Name</option><option value="4">Product</option>
+              <option value="5">Status</option><option value="6">{CostCentreCaption}</option><option value="7">Quantity</option>
+          </select>&nbsp;&nbsp;<input class="btn" type='submit' value='Go' class="textboxtext"  name="btnSubmitorder" src="images/go.gif" border='0' align=absMiddle>
+		&nbsp;&nbsp;&nbsp;<a href="adorders.asp?all={all}">Advanced Search</a>
+        <br><b>{searchresults}</b></td></tr>
+        </TBODY>
+      </TABLE>
+      </form>
+<!--/search-->
+
+<br>
+<!--TabTableStart-->
+<!--VIEWORDERS-->
+            <table border="0" cellpadding="10" cellspacing="0" class=wrapper width="100%">
+              <!--navbar--><tr><td colspan=4>{navbar}</td></tr><!--/navbar-->
+              <TR>
+                <TD align="left" class="tableheader">Date</TD>
+                <!--CART--><TD align="left" class="tableheader">Cart&nbsp;#</TD><!--/CART-->
+                <TD align="left" class="tableheader">Item&nbsp;#</TD>
+                <!--PO--><TD align="left" class="tableheader">PO&nbsp;#</TD><!--/PO-->
+				<!--OrderCost--><TD align="left" class="tableheader">Cost</TD><!--/OrderCost-->
+                <TD align="left" class="tableheader">Qty</TD>
+                <TD align="left" class="tableheader">Name</TD>
+                <TD align="left" class="tableheader">Product</TD>
+                <!--ShippingInfo--><TD align="left" class="tableheader">Shipping&nbsp;Info</TD><!--/ShippingInfo-->
+                <!--OrderedBy--><TD align="left" class="tableheader">Ordered&nbsp;By</TD><!--/OrderedBy-->
+                <!--status--><TD align="left" class="tableheader">Status</TD><!--/status-->
+                <TD align="left" class="tableheader">Preview</TD>
+              </tr>
+<!--ROW-->
+              <TR>
+                <td id=firstcolumn class="datatd" nowrap>{Date}</TD>
+                <!--CART--><td class="datatd">{CartId}</TD><!--/CART-->
+                <td class="datatd">{OrderNumber}</TD>
+                <!--PO--><td class="datatd">{PONumber}</TD><!--/PO-->
+				<!--OrderCostData--><td class="datatd">{OrderCost}</TD><!--/OrderCostData-->
+                <td class="datatd">{Quantity}</TD>
+                <td class="datatd">{EmpName}<!--VPrintProgress{Order_Id}--></TD>
+                <td class="datatd">{TemplateName}<!--ExtraOrderFields--></TD>
+                <!--ShippingInfo--><td class="datatd">{ShippingInfo}</TD><!--/ShippingInfo-->
+                <!--OrderedBy--><td class="datatd">{OrderedBy}</TD><!--/OrderedBy-->
+                <!--status--><td class="datatd">{Status}</TD><!--/status-->
+<!--ViewMyOrder-->
+                <td id=lastcolumn class="datatd" nowrap><a href="ShowOrder.asp?Order={Order_Id}&load=1"><img src="images/view.gif" border=0>view</a>
+                <!--VPrintDownload{Order_Id}-->
+<!--ReOrder--><br><a href="ShowReOrder.asp?Order={Order_Id}"><img src="images/reorder.gif" border=0>re-order</a><!--/ReOrder-->
+<!--Remove--><br><a href="javascript:deleteOrder('Orders.asp?Type={type}&remove={Order_Id}')"><img src=images/delete.gif border=0>remove</a><!--/Remove-->
+<!--Quote2Order--><br><a href="javascript:wopen('Quotes.asp?type=createorder&id={Order_Id}', 'quote2order', '450', '300')"><img src=images/reorder.gif border=0>Create Order</a><!--/Quote2Order-->
+<!--QuoteDelete--><br><a href="javascript:wopen('Quotes.asp?type=deletequote&id={Order_Id}', 'quotedelete', '450', '300')"><img src=images/delete.gif border=0>Delete Quote</a><!--/QuoteDelete-->
+<!--Email--><br><a href="javascript:openWin('ResendEmail.asp?id={Order_Id}')"><img src=images/email.gif border=0>resend email</a><!--/Email-->
+<!--/ViewMyOrder-->
+<!--ViewOrder-->
+                <td id=lastcolumn class="datatd" nowrap><a href="javascript:openWin('showorder.asp?order={Order_Id}&admin=1&load=1');"><img src="images/view.gif" border=0>view</a>
+<!--/ViewOrder-->
+<!--ViewNexJobOrder-->
+                <td id=lastcolumn class="datatd" nowrap><a href="ShowOrder.asp?Order={Order_Id}&admin=1&load=1"><img src="images/view.gif" border=0>view</a>
+<!--/ViewNexJobOrder-->
+                </td>
+              </tr>
+<!--/ROW-->
+              <tr><td align="right" colspan=6>&nbsp;</td></tr>
+            </table>
+<!--/VIEWORDERS-->
+<!--TabTableEnd-->

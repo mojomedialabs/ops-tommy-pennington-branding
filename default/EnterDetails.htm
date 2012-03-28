@@ -1,0 +1,322 @@
+<script type="text/javascript" src="Include/highslide.js"></script>
+<script type="text/javascript" src="Include/highslide.cfg.js"></script>
+<script src="JSCheck/Include.js" type="text/javascript" language="javascript1.1"></script>
+<SCRIPT SRC="include/validation.js" ID=clientEventHandlersJS LANGUAGE=javascript></SCRIPT>
+<script src="include/ajax.js"></script>
+<script type="text/javascript" language="javascript">
+
+	function functionOnLoad(){
+	    var blnValidateLoad;
+		loadSelectImages();
+		blnValidateLoad = validateLoad();
+		if (document.getElementById('btnPreview') != undefined) RefreshProof();
+		return blnValidateLoad;
+	}
+
+	function validateField(curInput)
+	{
+	  <!--validateField-->
+	  <!--visibleField-->
+	}
+
+	function loadSelectImages(){
+		var strFieldName = "";
+		var intCount = 1;
+		var elem = document.getElementById("Form1").elements;
+		for(var i = 0; i < elem.length; i++){
+			strFieldName = "" + elem[i].name + "";
+			if (strFieldName.match("pdfs_id") && elem[i].type != "hidden"){
+				if(elem[i].value != ''){
+					ShowThumb(elem[i], intCount);
+				}
+				intCount++;
+			}
+		}
+	}
+
+	function validateForm()
+	{
+	<!--validateSubmit-->
+	<!--validateForm-->
+		return true;
+	}
+
+	function hasValue(strName)
+	{
+	<!--hasvalue-->
+		return true;
+	}
+
+	function validateLoad()
+	{
+	<!--validateLoad-->
+		return true;
+	}
+
+	function ShowThumb(cboxCur, intIndex)
+	{
+	<!--ImageJava-->
+	}
+	function SpellWindow(strFieldName){
+	  var oSpell = new JavaScriptSpellCheck();
+	  oSpell.spellCheckWindow(strFieldName);
+	}
+
+	function limitText(limitField, limitNum) {
+		if (limitField.value.length > limitNum) {
+			limitField.value = limitField.value.substring(0, limitNum);
+			document.getElementById(limitField.id + "MaxChars").innerHTML = "<br>-Max Characters Reached-";
+
+		}
+			else{
+					document.getElementById(limitField.id + "MaxChars").innerHTML = "";
+			}
+	}
+
+	function PartialEscape (strInput)
+	{	var strTemp;
+		strTemp = strInput.replace(/%/g,'%25');
+		strTemp = strTemp.replace(/(\r\n|[\r\n])/g,'%0D%0A'); //Escape carrage returns - line feeds
+		strTemp = strTemp.replace(/&/g,'%26');
+		strTemp = strTemp.replace(/\+/g,'%2B');
+		strTemp = strTemp.replace(/ /g,'%20');
+		return strTemp;
+	}
+
+	function RefreshProof()
+	{
+		 var strURL = '';
+		 for(var i=0; i < document.getElementById('Form1').elements.length; i++)
+		  {
+		  if (i != 0) strURL += '&';
+		  strURL += document.getElementById('Form1').elements[i].name + '=' + PartialEscape(document.getElementById('Form1').elements[i].value);
+		  }
+		document.getElementById("spnLiveProof").innerHTML="<img src='images/process.gif' width=20>";
+		document.getElementById("btnPreview").style.display='none';
+		if(!AjaxPost("ShowProofAJAX.asp?type=refreshproof",stateChanged,strURL,false ))
+		{
+			document.getElementById("spnLiveProof").innerHTML = "Browser doesn't support AJAX";
+		}
+		else
+		{
+			document.getElementById("spnLiveProof").innerHTML='';
+			document.getElementById("btnPreview").style.display='';
+		}
+		getProofs(xmlHttp.responseText)
+		if (document.PreviewHsRegistration != undefined) PreviewHsRegistration();
+
+	}
+
+	function getProofs(strText)
+	{
+		var aryProofs = strText.split('<!--split-->');
+		if (document.getElementById('spnPDFProof'))document.getElementById('spnPDFProof').innerHTML = aryProofs[0];
+
+		if ((document.getElementById('spnFrontProof')) && (aryProofs.length > 1))document.getElementById('spnFrontProof').innerHTML = aryProofs[1];
+		if ((document.getElementById('spnBackProof')) && (aryProofs.length > 2))document.getElementById('spnBackProof').innerHTML = aryProofs[2];
+	}
+
+
+	function stateChanged() {};
+
+	function openWin(strURL)
+	{
+		var winCurrent
+		winCurrent = window.open(strURL, "", "width=600,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+		winCurrent.focus();
+	}
+
+
+
+</script>
+<!--headerson-->
+  <STYLE>
+   body {padding:0px;background-image:url(images/spacer.gif);background-color:#ffffff}
+   .bodyWrap{margin:5px}
+  </STYLE>
+<!--/headerson-->
+<style type="text/css">
+
+.highslide-html-content
+{
+    DISPLAY: none;
+    POSITION: absolute
+}
+.controlbar5
+{
+    BACKGROUND: url(highslidegraphics/controlbar5.gif);
+    FLOAT: right;
+    WIDTH: 83px;
+    HEIGHT: 18px
+}
+.controlbar5 A
+{
+    DISPLAY: block;
+    FLOAT: left;
+    HEIGHT: 18px
+}
+.controlbar5 A:hover
+{
+    BACKGROUND-IMAGE: url(highslidegraphics/controlbar5-hover.gif)
+}
+.controlbar5 .previous
+{
+    WIDTH: 20px
+}
+.controlbar5 .next
+{
+    BACKGROUND-POSITION: -20px 0px;
+    WIDTH: 20px
+}
+.controlbar5 .highslide-move
+{
+    BACKGROUND-POSITION: -40px 0px;
+    WIDTH: 20px
+}
+.controlbar5 .close
+{
+    BACKGROUND-POSITION: -60px 0px;
+    WIDTH: 20px
+}
+
+
+.highslide-loading
+{
+    BORDER-RIGHT: black 1px solid;
+    PADDING-RIGHT: 2px;
+    BACKGROUND-POSITION: 3px 1px;
+    BORDER-TOP: black 1px solid;
+    DISPLAY: block;
+    PADDING-LEFT: 22px;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: url(highslidegraphics/loader.white.gif);
+    PADDING-BOTTOM: 2px;
+    BORDER-LEFT: black 1px solid;
+    COLOR: black;
+    PADDING-TOP: 2px;
+    BORDER-BOTTOM: black 1px solid;
+    BACKGROUND-REPEAT: no-repeat;
+    FONT-FAMILY: sans-serif;
+    BACKGROUND-COLOR: white;
+    TEXT-DECORATION: none
+}
+
+
+.highslide-html
+{
+    BORDER-RIGHT: white 1px solid;
+    BORDER-TOP: white 1px solid;
+    BORDER-LEFT: white 1px solid;
+    BORDER-BOTTOM: white 1px solid;
+    BACKGROUND-COLOR: white
+}
+
+.highslide-wrapper .highslide-header UL
+{
+    PADDING-LEFT: 0px; PADDING-RIGHT: 0px; PADDING-TOP: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-ALIGN: right
+}
+
+.highslide-wrapper .highslide-header UL LI {DISPLAY: inline; PADDING-LEFT: 1em}
+.highslide-wrapper .highslide-header UL LI.highslide-previous {DISPLAY: none}
+.highslide-wrapper .highslide-header UL LI.highslide-next {DISPLAY: none}
+
+.highslide-wrapper .highslide-header A
+{
+    FONT-WEIGHT: bold;
+    TEXT-TRANSFORM: uppercase;
+    COLOR: gray;
+    TEXT-DECORATION: none
+}
+.highslide-wrapper .highslide-header .highslide-move A {CURSOR: move}
+
+</style>
+
+<script src="include/enterdetailsval.js" id="clientEventHandlersJS" language="javascript"></script>
+
+<form name=Form1 id=Form1 action="Step3New.asp{params}" method=post onSubmit="return validateForm()">
+<input type=hidden name="hidreturnto" id="hidreturnto" value="{returnto}">
+
+      <h1>{Name}</h1>
+<!--TabTableStart-->
+<table border=0 cellpadding="2" cellspacing="2" class="wrapper" width="100%">
+<!--Details-->
+  <tr>
+    <td colspan=2 width="100%">
+
+    <!--ProofTop-->
+	  <table border="0" cellpadding="2" cellspacing="2" class="wrapper">
+	    <!--LiveProof--><tr><td><span id="spnPDFProof"></span></td></tr><!--/LiveProof-->
+        <tr>
+	  	  <td><span id="spnFrontProof"><!--FrontThumb-->{FrontThumb}<br>{FrontTemplateName}<!--/FrontThumb--></span></td>
+		  <td><span id="spnBackProof"><!--BackThumb-->{BackThumb}<br>{BackTemplateName}<!--/BackThumb--></span></td>
+	    </tr>
+	    <!--LiveProof--><tr><td><span id="spnLiveProof"></span><input type="button" value="Refresh Preview" name="btnPreview" id="btnPreview" onClick="return RefreshProof();"></td></tr><!--/LiveProof-->
+	  </table>
+	  <!--/ProofTop-->
+    </td>
+  </tr>
+  <!--HelpText-->
+  <tr>
+    <td valign="top" colspan="2"><blockquote>{HelpText}</blockquote></td>
+  </tr>
+  <!--/HelpText-->
+  <tr>
+    <td valign="top">
+	  <table cellPadding=0 cellSpacing=0 width="100%" border=0>
+
+		<!--GroupHeader-->
+        <tr>
+          <td colspan=2 width="100%">
+            <table cellSpacing=0 cellPadding=0 border=0 width="100%">
+              <tr>
+                <td><IMG height=19 alt="" src="images/tab_g.gif" width=8 border=0></td>
+				<td class="labelgrouptext" background=images/tab_fond.gif nowrap>{Caption}</td>
+				<td><IMG height=19 alt="" src="images/tab_d.gif" width=8 border=0></td>
+				<td width="100%"><IMG height=1 alt="" src="images/spacer.gif" width=1 border=0></td>
+              </tr>
+              <tr><td colspan="4" height=2  width="100%" bgcolor=dce5ea><img src="images/spacer.gif" height=2 border=0></td></tr>
+			</table>
+          </td>
+		</tr>
+        <!--/GroupHeader-->
+
+        <!--Spacer-->
+        <tr><td>&nbsp;</td></tr>
+        <!--/Spacer-->
+
+		<!--ProfileCaptionHeader-->
+		<tr><td class=labeltext></td><td><table border="0" class=wrapper><tr><td></td><td><a style="cursor:hand" onClick="OpenLocator('EmployeeLocator.asp?Template_Id={Template_Id}&ProfileCaption={ProfileCaption}')" nowrap>&nbsp;&nbsp;<u>{ProfileCaption}</u></a></td></tr></table></td></tr>
+		<!--/ProfileCaptionHeader-->
+		<!--FieldLayout-->
+        <tr><td align="right" class=labeltext valign=top><b>{FieldCaption}</b>&nbsp;&nbsp;</td><td class=maintext nowrap><table border="0" class=wrapper><tr><td nowrap>{FieldCaptionOptions}{Field}</td><td>{FieldScreenTip}</td></tr></table></td></tr>
+         <!--/FieldLayout-->
+<!--/Details-->
+        <input type=hidden class=textboxtext Name=pid size="5" value="{pid}">
+<!--BUTTONS-->
+        <tr>
+		  <td></td>
+		  <td><br><input type="button" value="Cancel" onClick="window.history.back()">&nbsp;<input type=submit name="btnSubmit" value ="Next >>"><br></td>
+		</tr>
+<!--/BUTTONS-->
+      </table>
+	  </form>
+	</td>
+	<td valign="top" align="right">
+	<!--ProofRight-->
+	  <table class=wrapper>
+	    <tr>
+		  <td>
+			  <!--LiveProof--><span id="spnPDFProof"></span><br><!--/LiveProof-->
+
+				  <span id="spnFrontProof"><!--FrontThumb-->{FrontThumb}<br>{FrontTemplateName}<br><!--/FrontThumb--></span><br>
+				  <span id="spnBackProof"><!--BackThumb-->{BackThumb}<br>{BackTemplateName}<br><!--/BackThumb--></span><br>
+			<!--LiveProof--><span id="spnLiveProof"></span><input type="button" value="Refresh Preview" name="btnPreview" id="btnPreview" onClick="return RefreshProof();"><!--/LiveProof-->
+		  </td>
+		</tr>
+	  </table>
+	<!--/ProofRight-->
+		</td>
+  </tr>
+</table>
+<!--TabTableEnd-->

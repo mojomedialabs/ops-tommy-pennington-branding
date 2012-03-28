@@ -1,0 +1,538 @@
+<div id="alert-message">
+	<div id="alert-message-title"></div>
+	<div id="alert-message-body"></div>
+</div>
+<div id="order-ids" style="display: none;">{orderids}</div>
+<div id="currency-symbol" style="display: none;">{CurrencySymbol}</div>
+<div id="order-total" style="display: none;">{total}</div>
+<div id="budget-total" style="display: none;">{budgettotal}</div>
+<div id="available-balance" style="display: none;">{availablebalance}</div>
+<div id="allowance-time" style="display: none;">{allowancetime}</div>
+<div id="invoice-only" style="display: none;">{invoiceOnly}</div>
+<div id="cost-of-items" style="display: none;">{CostOfItems}</div>
+<div id="handling-cost" style="display: none;">{HandlingCost}</div>
+<div id="tax-rate" style="display: none;">{TaxRate}</div>
+<div id="tax-freight" style="display: none;">{TaxFreight}</div>
+<div id="discount" style="display: none;">{Discount}</div>
+<script src="include/ajax.js"></script>
+<script>
+
+function setup() {
+	if (document.getElementById('EIFGroupNameList').value != '') EIFGroupClicked('');
+
+	var invoiceOnly = $("#invoice-only").text().trim();
+
+	if (invoiceOnly !== "") {
+		TogglePONumber(invoiceOnly);
+	}
+}
+
+function UpdateFreight(intIndex) {
+<!--COST-->
+	var dblCostOfItems = {CostOfItems};
+	var dblHandling = {HandlingCost};
+	var dblTax = {TaxRate};
+	var dblTaxCost = 0;
+	var blnTaxFreight = {TaxFreight};
+	var dblDiscount = {Discount};
+<!--FREIGHTJavascript-->
+
+	if (isEmpty(intIndex))
+	{
+		intIndex = document.Form1.elements['hidfreight'].value
+	}
+	else
+	{
+		document.Form1.elements['hidfreight'].value = intIndex
+	}
+
+	var dblFreight = parseFloat(document.Form1.elements['FreightCostOp' + intIndex].value);
+	$("#freightcost").html('{CurrencySymbol}' + dblFreight.toFixed(2));
+	$("#freighthandlingcost").html('{CurrencySymbol}' + (dblFreight + dblHandling).toFixed(2));
+<!--TAXJavascript-->
+	$("#subtotal").html('{CurrencySymbol}' + (dblCostOfItems + dblFreight + dblHandling - dblDiscount).toFixed(2));
+	if (blnTaxFreight)
+	{
+		dblTaxCost = dblTax * (dblCostOfItems + dblFreight + dblHandling)
+		$("tax").html('{CurrencySymbol}' + dblTaxCost.toFixed(2));
+	} else {
+		dblTaxCost = dblTax * (dblCostOfItems);
+		$("#tax").html('{CurrencySymbol}' + dblTaxCost.toFixed(2));
+	}
+<!--/TAXJavascript-->
+	$("#total").html('{CurrencySymbol}' + (dblTaxCost + (dblCostOfItems + dblFreight + dblHandling - dblDiscount)).toFixed(2));
+<!--/FREIGHTJavascript-->
+	CalculateBudget();
+<!--/COST-->
+
+/*	var dblCostOfItems = parseFloat($("#cost-of-items").text().trim());
+	var dblHandling = parseFloat($("#handling-cost").text().trim());
+	var dblTax = parseFloat($("#tax-rate").text().trim());
+	var dblTaxCost = 0;
+	var blnTaxFreight = $("#tax-freight").text().trim().toLowerCase() === "true";
+	var dblDiscount = parseFloat($("#discount").text().trim());
+	<!--FREIGHTJavascript -->
+
+	if (isEmpty(intIndex)) {
+		intIndex = document.Form1.elements['hidfreight'].value
+	} else {
+		document.Form1.elements['hidfreight'].value = intIndex
+	}
+
+	var dblFreight = parseFloat(document.Form1.elements['FreightCostOp' + intIndex].value);
+	freightcost.innerHTML = '{CurrencySymbol}' + dblFreight.toFixed(2);
+	freighthandlingcost.innerHTML = '{CurrencySymbol}' + (dblFreight + dblHandling).toFixed(2);
+	<!--TAXJavascript -->
+	subtotal.innerHTML = '{CurrencySymbol}' + (dblCostOfItems + dblFreight + dblHandling - dblDiscount).toFixed(2);
+	if (blnTaxFreight) {
+		dblTaxCost = dblTax * (dblCostOfItems + dblFreight + dblHandling)
+		tax.innerHTML = '{CurrencySymbol}' + dblTaxCost.toFixed(2);
+	} else {
+		dblTaxCost = dblTax * (dblCostOfItems);
+		tax.innerHTML = '{CurrencySymbol}' + dblTaxCost.toFixed(2);
+	}
+	<!--/TAXJavascript-->
+	total.innerHTML = '{CurrencySymbol}' + (dblTaxCost + (dblCostOfItems + dblFreight + dblHandling - dblDiscount)).toFixed(2);
+	<!--/FREIGHTJavascript -->
+	CalculateBudget();*/
+}
+
+function ValidData() {
+	<!--AdditionalEmailAddressRequired-->
+	<!--DeliveryAddressLogic-->
+	<!--PONumberLogic-->
+	<!--ExtraInfoLogic-->
+
+	if (!hasApproverEmail()) {
+		return false;
+	}
+
+	EnableFields();
+
+	return true;
+}
+
+function EnableFields() {
+	var objElements;
+	var i;
+
+	objElements = document.getElementsByTagName("input");
+
+	for (i = 0; i < objElements.length; i++) {
+		if (objElements[i].disabled) {
+			objElements[i].value = "";
+		}
+		objElements[i].disabled = false;
+	}
+
+	objElements = document.getElementsByTagName("select");
+	for (i = 0; i < objElements.length; i++) {
+		if (objElements[i].disabled) {
+			objElements[i].selectedIndex = "0";
+		}
+		objElements[i].disabled = false;
+	}
+}
+
+function CheckEntry(ctrlCur, strCaption, blnRequired, strLength, strType) {
+
+	if ((isWhitespace(document.Form1.elements[ctrlCur].value)) && blnRequired) {
+		alert('You must enter a value for ' + strCaption);
+		document.Form1.elements[ctrlCur].focus();
+		return false;
+	}
+
+	if (strLength != '') {
+
+		var intLen = parseInt(strLength);
+
+		if (intLen != 0) {
+			if ((document.Form1.elements[ctrlCur].value.length != intLen) && (strType == 'exactly')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length < intLen) && (strType == 'at least')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter at least ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length > intLen) && (strType == 'at most')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter at most ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+function isEmpty(strCurrent) {
+	return ((strCurrent == null) || (strCurrent.length == 0))
+}
+
+function TogglePONumber(invoiceOnly) {
+	if (invoiceOnly) {
+		if (eval(document.Form1.PaymentType)) {
+			if (document.Form1.elements['PaymentType'].options[document.Form1.elements['PaymentType'].selectedIndex].value == "Invoice") {
+				document.getElementById('ponumberbox').style.display = "";
+			} else {
+				document.getElementById('ponumberbox').style.display = "none";
+				document.Form1.elements['PONumber'].value = "";
+			}
+		}
+	}
+}
+
+function CheckApproverEmail() {
+	var strValue = document.Form1.elements['preapprovalselect'].value;
+	var strDisplay = '';
+
+	if (strValue.length > 0) {
+		if (strValue.charAt(0) != '@') strDisplay = 'none';
+	}
+
+	document.Form1.elements['preapproval'].style.display = strDisplay;
+}
+
+function hasApproverEmail() {
+	var blnCheckEmail = false;
+	var strEmail = '';
+
+	if (document.getElementById('preapproval') != null) {
+		blnCheckEmail = true;
+		strEmail = document.getElementById('preapproval').value;
+	}
+
+	if (document.getElementById('preapprovalselect') != null) {
+		blnCheckEmail = true;
+		if (document.getElementById('preapprovalselect').value.length > 0) {
+			if (document.getElementById('preapprovalselect').value.charAt(0) != '@') strEmail = '';
+		}
+
+		strEmail += document.getElementById('preapprovalselect').value;
+	}
+
+	if (blnCheckEmail) {
+		if (!isEmail(strEmail, false)) {
+			alert('Please enter an approver\'s email address');
+			return false
+		}
+	}
+
+	return true;
+}
+
+function isEmail(s) {
+	if (isWhitespace(s)) if (isEmail.arguments.length == 1) return false;
+	else return (isEmail.arguments[1] == true);
+
+	if (isWhitespace(s)) return false;
+	var i = 1;
+	var sLength = s.length;
+
+	while ((i < sLength) && (s.charAt(i) != "@")) {
+		i++
+	}
+
+	if ((i >= sLength) || (s.charAt(i) != "@")) return false;
+	else i += 2;
+
+	// look for .
+	while ((i < sLength) && (s.charAt(i) != ".")) {
+		i++
+	}
+	if ((i >= sLength - 1) || (s.charAt(i) != ".")) return false;
+	else return true;
+}
+
+function EIFGroupClicked(strVal) {
+	var aryGroups;
+	var iCntr = 0;
+	var children;
+	var i;
+	var strGNList = document.getElementById('EIFGroupNameList').value;
+
+	if (strVal == '') {
+		for (i = 0; i < document.Form1.eifgroup.length; i++) {
+			if (document.Form1.eifgroup[i].checked) {
+				strVal = document.Form1.eifgroup[i].value;
+			}
+		}
+		if (strVal == '') {
+			document.Form1.eifgroup[0].checked = true;
+			strVal = document.Form1.eifgroup[0].value;
+		}
+	}
+
+	aryGroups = strGNList.split("|");
+	for (iCntr = 0; iCntr < aryGroups.length; iCntr++) {
+		children = document.getElementById('div' + aryGroups[iCntr]).getElementsByTagName('*');
+		for (i = 0; i < children.length; i++) {
+			if (children[i].type == "text" || children[i].type == "select-one") {
+				children[i].disabled = true;
+			}
+		}
+
+		children = document.getElementsByName("GroupItem" + aryGroups[iCntr]);
+
+		for (i = 0; i < children.length; i++) {
+			setOpacity(50, children[i]);
+		}
+	}
+
+	children = document.getElementById('div' + strVal).getElementsByTagName('*');
+	for (i = 0; i < children.length; i++) {
+		children[i].disabled = false;
+		setOpacity(100, children[i]);
+	}
+}
+
+function setOpacity(opacity, objObject) {
+	// IE/Win
+	objObject.style.filter = "alpha(opacity:" + opacity + ")";
+	objObject.style.zoom = 1;
+
+	// Safari<1.2, Konqueror
+	objObject.style.KHTMLOpacity = opacity / 100;
+
+	// Older Mozilla and Firefox
+	objObject.style.MozOpacity = opacity / 100;
+
+	// Safari 1.2, newer Firefox and Mozilla, CSS3
+	objObject.style.opacity = opacity / 100;
+}
+</script>
+<!--TabTableStart-->
+<!--ORDERS-->
+<form action="Checkout.asp" method="post" name="Form1">
+	<input type="hidden" name="cc" value="{CC}" />
+	<!--Budget-->
+	<div id="budget">
+		<div id="budgetallowance">
+			<strong>{allowancetime} Allowance:</strong> {allowance}
+		</div>
+		<div id="budgetcurrent">
+			<strong>Current Balance:</strong> {balance}
+		</div>
+		<div id="budgetavailable">
+			<strong>Available Balance:</strong> {availablebalance}
+		</div>
+	</div>
+	<!--/Budget-->
+	<!--DeliveryDetails-->
+	<div id="delivery-details">
+		<div id="ordered-by">
+			<strong>Ordered By:</strong><br />
+			{OrderDetails}
+		</div>
+		<div id="deliver-to">
+			<strong>Deliver To:</strong><br />
+			{DeliveryAddress}
+		</div>
+		<!--BillingColumn-->
+		<div id="bill-to">
+			<strong>Bill To:</strong><br />
+			{BillingAddress}
+		</div>
+		<!--/BillingColumn-->
+	</div>
+	<!--/DeliveryDetails-->
+	<table id="checkout">
+		<thead>
+			<tr>
+				<th scope="col" class="checkout-item-number">Item #</th>
+				<th scope="col" class="checkout-date">Date</th>
+				<th scope="col" class="checkout-quantity">Quantity</th>
+				<th scope="col" class="checkout-product-name">Product Name</th>
+				<!--COST--><th scope="col" class="checkout-cost">Cost</th><!--/COST-->
+				<!--BudgetAllocation--><th scope="col" class="checkout-budget-allocation">Allocated to Budget</th><!--/BudgetAllocation-->
+				<!--Delivery--><th scope="col" class="checkout-delivery">Delivery</th><!--/Delivery-->
+			</tr>
+		</thead>
+		<tbody>
+			<!--ROW-->
+			<tr>
+				<td class="checkout-item-number">{OrderNumber}</td>
+				<td class="checkout-date">{Date}</td>
+				<td class="checkout-quantity">{Quantity}</td>
+				<td class="checkout-product-name">{TemplateName}</td>
+				<!--COST--><td class="checkout-cost">{Discount{Order_Id}} {Cost}</td><!--/COST-->
+				<!--BudgetAllocation--><td class="checkout-budget-allocation">{CurrencySymbol} {AllocatedToBudget}</td><!--/BudgetAllocation-->
+				<!--Delivery--><td class="checkout-delivery">{Address}</td><!--/Delivery-->
+			</tr>
+			<!--Postage-->
+			<tr>
+				<th scope="col" class="checkout-item-number"></th>
+				<th scope="col" class="checkout-date"></th>
+				<th scope="col" class="checkout-quantity"></th>
+				<th scope="col" class="checkout-product-name">Postage</th>
+				<!--COST--><th scope="col" class="checkout-cost">{Postage}</th><!--/COST-->
+				<!--BudgetAllocation--><th scope="col" class="checkout-budget-allocation"></th><!--/BudgetAllocation-->
+				<!--Delivery--><th scope="col" class="checkout-delivery"></th><!--/Delivery-->
+			</tr>
+			<!--/Postage-->
+			<!--PurchaseListPrice-->
+			<tr>
+				<th scope="col" class="checkout-item-number"></th>
+				<th scope="col" class="checkout-date"></th>
+				<th scope="col" class="checkout-quantity"></th>
+				<th scope="col" class="checkout-product-name">Purchase List Price</th>
+				<!--COST--><th scope="col" class="checkout-cost">{PurchaseListPrice}</th><!--/COST-->
+				<!--BudgetAllocation--><th scope="col" class="checkout-budget-allocation"></th><!--/BudgetAllocation-->
+				<!--Delivery--><th scope="col" class="checkout-delivery"></th><!--/Delivery-->
+			</tr>
+			<!--/PurchaseListPrice-->
+			<!--/ROW-->
+			<!--COST-->
+			<tr id="checkout-cost-of-items">
+				<td colspan="4">Cost of Items</td>
+				<td>{totalcost}</td>
+			</tr>
+			<!--HANDLING-->
+			<tr id="checkout-handling" class="{ShowHideHandling}">
+				<td colspan="4">{HandlingCaption}</td>
+				<td id="handlingcost">{handling}</td>
+			</tr>
+			<!--/HANDLING-->
+			<!--FREIGHT-->
+			<tr id="checkout-freight" class="{ShowHideFreight}">
+				<td colspan="4">{FreightCaption}</td>
+				<td id="freightcost">{freight}</td>
+			</tr>
+			<!--/FREIGHT-->
+			<!--FREIGHTHANDLING-->
+			<tr id="checkout-freighthandling" class="{ShowHideFreightHandling}">
+				<td colspan="4">{FreightCaption}</td>
+				<td id="freighthandlingcost">{freighthandling}</td>
+			</tr>
+			<!--/FREIGHTHANDLING-->
+			<!--DISCOUNT-->
+			<tr id="checkout-discount" class="{ShowHideFreightHandling}">
+				<td colspan="4">* Group Discount</td>
+				<td>-{DiscountPrice}</td>
+			</tr>
+			<!--/DISCOUNT-->
+			<!--TAX-->
+			<tr id="checkout-subtotal">
+				<td colspan="4">Total Excluding {TaxLabel}</td>
+				<td id="subtotal">{subtotal}</td>
+			</tr>
+			<tr id="checkout-tax">
+				<td colspan="4">{TaxLabel}</td>
+				<td id="tax">{tax}</td>
+			</tr>
+			<!--/TAX-->
+			<tr id="checkout-total">
+				<td colspan="4">Total {taxinc} <!--TAXLABEL-->{TaxLabel}<!--/TAXLABEL--></td>
+				<td id="total">{total}</td>
+			</tr>
+			<!--BudgetTotals-->
+			<!--BudgetAllocation-->
+			<tr id="checkout-budget-allocation">
+				<td colspan="4">Allocated To Budget</td>
+				<td id="budgettotal">{budgettotal}</td>
+			</tr>
+			<tr id="checkout-budget-total">
+				<td colspan="4">Total to Pay</td>
+				<td id="budgettotaltopay">{budgettotaltopay}</td>
+			</tr>
+			<!--/BudgetAllocation-->
+			<!--/BudgetTotals-->
+			<!--/COST-->
+		</tbody>
+	</table>
+	<!--OrderDetails-->
+	<div id="checkout-order-details">
+		<h2>Order Details</h2>
+		<!--ExtraInfos-->
+		<div id="checkout-extra-info">
+			{ExtraInfoCaption}: {ExtraInfoField}
+		</div>
+		<!--/ExtraInfos-->
+		<!--ExtraInfoGroup-->
+		<div id="div{GroupName}">
+			<!--ExtraInfoGroupSelect-->
+			<input type="radio" name="eifgroup" value="{GroupName}" onClick="EIFGroupClicked(this.value)" {GroupSelected} />
+			<!--/ExtraInfoGroupSelect-->
+			{GroupName}
+			<!--ExtraInfosGroup-->
+			<div name="GroupItem{GroupName}" id="GroupItem{GroupName}">
+				{ExtraInfoCaption}
+			</div>
+			<div name="GroupItem{GroupName}" id="GroupItem{GroupName}">
+				{ExtraInfoField}
+			</div>
+			</tr>
+			<!--/ExtraInfosGroup-->
+		</div>
+		<!--/ExtraInfoGroup-->
+		<!--PaymentType-->
+		<div id="checkout-payment-type">
+			<label for="PaymentType">
+				Payment Type
+				<select name="PaymentType" id="PaymentType" onChange="TogglePONumber({invoiceOnly});">
+					<option value="Credit Card">Credit Card</option>
+					<option value="Invoice">Invoice</option>
+				</select>
+			</label>
+		</div>
+		<!--/PaymentType-->
+		<!--PONumber-->
+		<div id="ponumberbox">
+			<label for="PONumber">PO Number</label>
+			<input type="text" name="PONumber" id="PONumber" value="{PONumber}" style="border: 1px #cacaca solid;" />
+		</div>
+		<!--/PONumber-->
+		<!--PreApproval-->
+		<div id="checkout-approvers-email">
+			Approver's Email: {PreApproval}
+		</div>
+		<!--/PreApproval-->
+	</div>
+	<!--/OrderDetails-->
+	<!--AdditionalConfirmationEmail-->
+	<div id="checkout-additional-confirmation-email">
+		<label for="AdditionalEmailAddress">Additional Confirmation Email</label>
+		<input type="text" name="AdditionalEmailAddress" id="AdditionalEmailAddress" value="{AdditionalEmailAddress}" />
+	</div>
+	<!--/AdditionalConfirmationEmail-->
+	{freightoptions}
+	<input type="hidden" id="EIFGroupNameList" value="{EIFGroupNameList}" />
+	<input type="hidden" name="DeliveryAddress" value="{DA}" />
+	<input type="hidden" name="Address1" value="{DA1}" />
+	<input type="hidden" name="Address2" value="{DA2}" />
+	<input type="hidden" name="Address3" value="{DA3}" />
+	<input type="hidden" name="Address4" value="{DA4}" />
+	<input type="hidden" name="Suburb" value="{DASuburb}" />
+	<input type="hidden" name="State" value="{DAState}" />
+	<input type="hidden" name="Postcode" value="{DAPostcode}" />
+	<input type="hidden" name="Country" value="{DACountry}" />
+	<input type="hidden" name="AttentionTo" value="{DAAttention}" />
+	<input type="hidden" name="AddressCompany" value="{DAAddressCompany}" />
+	<input type="hidden" name="AddressPhoneNumber" value="{DAAddressPhoneNumber}" />
+	<input type="hidden" name="BillingAddress" value="{BA}" />
+	<input type="hidden" name="BillingAddress1" value="{BA1}" />
+	<input type="hidden" name="BillingAddress2" value="{BA2}" />
+	<input type="hidden" name="BillingAddress3" value="{BA3}" />
+	<input type="hidden" name="BillingAddress4" value="{BA4}" />
+	<input type="hidden" name="BillingSuburb" value="{BASuburb}" />
+	<input type="hidden" name="BillingState" value="{BAState}" />
+	<input type="hidden" name="BillingPostcode" value="{BAPostcode}" />
+	<input type="hidden" name="BillingCountry" value="{BACountry}" />
+	<input type="hidden" name="orderids" value="{orderids}" />
+	<input type="hidden" name="GroupDiscount" value="{GroupDiscount}" />
+	<input type="hidden" name="TotalAllocatedToBudget" value="{TotalAllocatedToBudget}" />
+	<input type="hidden" name="PayForBudget" value="{PayForBudget}" />
+	<input type="button" value="Return to Cart" id="btnBack" />
+	<!--OrderButton-->
+	<input type="submit" value="Submit Order" id="btnFinal" name="btnFinal" />
+	<!--/OrderButton-->
+</form>
+<p id="pricing-disclaimer">Pricing is based on when this product had originally been purchased. Pricing may have changed from the original purchase date. If there is a discrepancy, you will be notified prior to the order proceeding.</p>
+<!--/ORDERS-->
+<!--TabTableEnd-->
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/checkout.js"></script>

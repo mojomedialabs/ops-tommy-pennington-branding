@@ -1,0 +1,128 @@
+<div id="alert-message">
+	<div id="alert-message-title">
+	</div>
+	<div id="alert-message-body">
+	</div>
+</div>
+<form id="Form1" class="registration" name="Form1" method="post">
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label for="FName">{NameFirstNameCaption}</label><br />
+			<input type="text" id="FName" name="FName" value="{FName}" />
+		</div>
+		<div class="registration-field">
+			<label for="SName">{NameSurnameCaption}</label><br />
+			<input type="text" id="SName" name="SName" value="{SName}" />
+		</div>
+		<div class="registration-field">
+			<label for="Phone">Phone Number</label><br />
+			<input type="text" id="Phone" name="Phone" value="{Phone}" />
+		</div>
+		<div class="registration-field">
+			<label for="Fax">Fax Number</label><br />
+			<input type="text" id="Fax" name="Fax" value="{Fax}" />
+		</div>
+	</div>
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label for="Password">Password</label><br />
+			<input type="password" id="Password" name="Password" value="{Password}" />
+		</div>
+		<div class="registration-field">
+			<label for="ConfirmPassword">Confirm Password</label><br />
+			<input type="password" id="ConfirmPassword" name="ConfirmPassword" value="{Password}" />
+		</div>
+	</div>
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label for="Email">Email Address</label><br />
+			<input type="text" id="Email" name="Email" value="{Email}" />
+		</div>
+		<!--SelfActivate-->
+		<div class="registration-field">
+			<label for="ConfirmEmail">Confirm Email Address</label><br />
+			<input type="text" id="ConfirmEmail" name="ConfirmEmail" value="{Email}" />
+		</div>
+		<!--/SelfActivate-->
+	</div>
+	<!--Address-->
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label for="Address1">Address Line 1</label><br />
+			<input type="text" id="Address1" name="Address1" value="{Address1}" /><br />
+			<label for="Address2">Line 2</label><br />
+			<input type="text" id="Address2" name="Address2" value="{Address2}" /><br />
+			<label for="Address3">Line 3</label><br />
+			<input type="text" id="Address3" name="Address3" value="{Address3}" />
+		</div>
+		<div class="registration-field">
+			<label for="Suburb">City</label><br />
+			<input type="text" id="Suburb" name="Suburb" value="{Suburb}" /><br />
+			<label for="State">State</label><br />
+			<input type="text" id="State" name="State" value="{State}" />
+		</div>
+		<div class="registration-field">
+			<label for="Postcode">Zipcode</label><br />
+			<input type="text" id="Postcode" name="Postcode" value="{Postcode}" /><br />
+			<label for="Country">Country</label><br />
+			<input type="text" id="Country" name="Country" value="{Country}" />
+		</div>
+	</div>
+	<!--/Address-->
+	<!--<div class="registration-field-row">
+		<label for="DefaultDetails"><input type="checkbox" id="DefaultDetails" name="DefaultDetails" /> Default my details on artwork?</label>
+	</div>-->
+	<!--CostCentres-->
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label>{CostCentreCaption}</label><br />
+			{CostCentres}
+		</div>
+	</div>
+	<!--/CostCentres-->
+	<!--ExtraInfos-->
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label>{ExtraInfoCaption}</label><br />
+			{ExtraInfoField}{cclink}
+		</div>
+	</div>
+	<!--/ExtraInfos-->
+	<!--ExtraInfoGroup-->
+	<div id="div{GroupName}" class="registration-field-row">
+		<div class="registration-field">
+			<!--ExtraInfoGroupSelect-->
+			<input type="radio" name="eifgroup" value="{GroupName}" onClick="EIFGroupClicked(this.value)" {GroupSelected} />
+			<!--/ExtraInfoGroupSelect-->
+			{GroupName}
+		</div>
+		<!--ExtraInfosGroup-->
+		<div class="registration-field">
+			<label for="GroupItem{GroupName}">{ExtraInfoCaption}</label><br />
+			{ExtraInfoField}
+		</div>
+		<!--/ExtraInfosGroup-->
+	</div>
+	<!--/ExtraInfoGroup-->
+	<!--AdditionalInfo-->
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label>{AdditionalInfoCaption}</label><br />
+			<input type="text" id="AdditionalInfo" name="AdditionalInfo" value="{AdditionalInfoText}" />
+		</div>
+	</div>
+	<!--/AdditionalInfo-->
+	<!--RegistrationImage-->
+	<div class="registration-field-row">
+		<div class="registration-field">
+			<label>Image Details</label>
+			{ImageSource}
+		</div>
+	</div>
+	<!--/RegistrationImage-->
+	<input type="hidden" name="UserName" Value="{UserName}">
+	<input type="hidden" id="EIFGroupNameList" value="{EIFGroupNameList}" />
+	<input type="submit" value="Save" id="btnSubmit" name="btnSubmit" />
+</form>
+<script src="http://marketingcandystore.com/Files/BrokerBranding/mcpro/Include/validate.js"></script>
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/registrationup.js"></script>

@@ -1,0 +1,127 @@
+<script>
+<!--ProductIds-->
+<!--ProductCosting-->
+<!--ExtraJavaScript-->
+
+function CheckExtraFields(ProductId)
+{
+	<!--CheckProductFields-->
+	return true;
+}
+</script>
+<div id="alert-message">
+	<div id="alert-message-title">
+	</div>
+	<div id="alert-message-body">
+	</div>
+</div>
+<!--TABTABLE-->
+	<!--TabTableStart-->
+		<form id="products-search" method="post" name="frmSearch">
+			<label for="txtSearch">Search:</label>
+			<input type="text" name="txtSearch" id="txtSearch" value="{search}" />
+			<input type="submit" name="btnSearch" id="btnSearch" value= "Go" />
+			<input type="hidden" name="ccid" value="{ccid}" />
+			<input type="hidden" name="nothing" />
+		</form>
+		<form name="Form1" method="post" id="Form1">
+			<!--Style-->
+				<!--TemplateItem-->
+					<div id="product-{id}" class="template-product">
+						<div class="product-name">
+							<h1>{TemplateName}</h1>
+						</div>
+						<div class="product-thumbnail">
+							<img src={Thumbnail} id="thumbimg{id}" />
+						</div>
+						<div class="product-description-container">
+							<p>Click &quot;Next&quot; to continue ordering this item. You will be asked for a quantity and then asked to enter the template details.</p>
+						</div>
+						<div class="product-actions">
+							<input type="button" onClick="javascript:window.location='{location}'" value="Next">
+						</div>
+					</div>
+				<!--/TemplateItem-->
+			<!--/Style-->
+			<!--Products-->
+			<!--ADDCART-->
+			<div class="products-add-to-cart">
+				<input type="submit" name="btnCartContinue" id="btnCartContinueTop" value="Add to Cart" />
+				<input type="submit" name="btnCart" id="btnCartTop" value="Add to Cart and Checkout" />
+			</div>
+			<!--/ADDCART-->
+			<div id="products">
+				<div class="extras-headers"><!--ExtraHeader--></div>
+				<!--ProductStyle-->
+				<div id="product-{templateid}" class="product">
+					<input type="hidden" name="ProductName{templateid}" value="{templatename}" />
+					<div class="product-name">
+						<h1>{templatename}</h1>
+					</div>
+					<div class="product-thumbnail">
+						<img src={thumb} id="thumbimg{templateid}" />
+					</div>
+					<div class="product-description-container">
+						<!--Description-->
+						{desc}
+						<!--/Description-->
+						<!--stock-->
+						<div class="product-stock">In Stock: {stockqty}</div>
+						<!--/stock-->
+					</div>
+					<div class="product-extras">
+						{extras}
+					</div>
+					<div class="product-actions">
+						<div class="product-checkbox">
+							<!--ProductCheckBox-->
+							<label for="template{templateid}">Add<input type="checkbox" name="template" id="template{templateid}" value="{templateid}" checked /></label>
+							<!--/ProductCheckBox-->
+						</div>
+						<div class="product-quantity">
+							<label for="qty{templateid}">Qty: {quantity}</label>
+						</div>
+						<div class="products-add-to-cart">
+							<input type="submit" name="btnCartContinue" id="btnCartContinueBottom" value="Add to Cart" />
+							<input type="submit" name="btnCart" id="btnCartBottom" value="Add to Cart and Checkout" />
+						</div>
+						<div class="product-favorite">
+							<!--Favourite-->
+								<a href="AddFav.asp?Id={templateid}" id="add-to-f" class="new-window" title="Forgot your password?" data-height="350" data-width="450"><img src="Files/BrokerBranding/mc/Include/favorite.png" title="Add to Favorites!" /></a>
+							<!--/Favourite-->
+						</div>
+					</div>
+				</div>
+				<!--/ProductStyle-->
+			</div>
+			<!--/Products-->
+			<!--CATEGORIES-->
+			<div id="favorites">{Favorites}</div>
+			<div id="product-categories">
+				<!--menuitem-->
+				<div class="product-category">
+					<div class="product-category-thumbnail">
+						{Thumbnail1}
+					</div>
+					<div class="product-category-name">
+						{Caption1}
+					</div>
+				</div>
+				<!--CategoryItem2-->
+				<div class="product-category">
+					<div class="product-category-thumbnail">
+						{Thumbnail2}
+					</div>
+					<div class="product-category-name">
+						{Caption2}
+					</div>
+				</div>
+				<!--/CategoryItem2-->
+				<!--/menuitem-->
+			</div>
+			<!--/CATEGORIES-->
+		</form>
+	<!--TabTableEnd-->
+<!--/TABTABLE-->
+<script src="http://marketingcandystore.com/Files/BrokerBranding/mcpro/Include/validate.js"></script>
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/productcategories.js"></script>

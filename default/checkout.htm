@@ -1,0 +1,628 @@
+<STYLE type=text/css>
+.totalrow
+{
+    BORDER-RIGHT: #c6d2de 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-BOTTOM: #54678c 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-WEIGHT: bold;
+    BACKGROUND: #ffffff;
+    PADDING-BOTTOM: 1px;
+    BORDER-LEFT: #c6d2de 1px solid;
+    COLOR: #666666;
+    PADDING-TOP: 1px;
+    BORDER-TOP: #c6d2de 3px double
+}
+.subtotalrow
+{
+    BORDER-RIGHT: #c6d2de 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-TOP: #54678c 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-WEIGHT: bold;
+    BACKGROUND: #ffffff;
+    PADDING-BOTTOM: 1px;
+    BORDER-LEFT: #c6d2de 1px solid;
+    COLOR: #666666;
+    PADDING-TOP: 1px;
+    BORDER-BOTTOM: #c6d2de 3px double
+}
+.Hide {display: none;}
+.Show {	display: ;}
+</STYLE>
+<script src="include/ajax.js"></script>
+<SCRIPT LANGUAGE="JAVASCRIPT">
+function stopRKey(evt) {
+  var evt = (evt) ? evt : ((event) ? event : null);
+  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+  if ((evt.keyCode == 13) && (node.type!="textarea"))  {return false;}
+}
+document.onkeypress = stopRKey;
+
+function CheckLiveStock()
+{
+	if(!AjaxGet("CheckLiveStockAjax.asp?Orders={orderids}", AfterCheckStock, false))
+		{
+			alert("Browser doesn't support AJAX");
+		}  
+	if (xmlHttp.responseText=='OK')
+				return true;
+		else 
+		{
+			if (xmlHttp.responseText=='NOKCap')
+				{
+				alert('{Cart - Quantity Cap Error Return Cart}');
+				window.location = 'cart.asp'
+				return false;
+				}
+			else 
+				{
+				alert('{Cart - Stock Level Error}');
+				window.location = 'cart.asp'
+				return false;
+				}
+		}
+}
+	
+function AfterCheckStock()
+{
+return true;
+}
+
+function setup()
+{
+	if(document.getElementById('EIFGroupNameList').value!='') EIFGroupClicked('');
+	TogglePONumber({invoiceOnly});
+	{freightload}
+}
+
+function UpdateFreight(intIndex)
+{
+<!--COST-->
+	var dblCostOfItems = {CostOfItems};
+	var dblHandling = {HandlingCost};
+	var dblTax = {TaxRate};
+	var dblTaxCost = 0;
+	var blnTaxFreight = {TaxFreight};
+	var dblDiscount = {Discount};
+<!--FREIGHTJavascript-->
+
+	if (isEmpty(intIndex))
+	{
+		intIndex = document.Form1.elements['hidfreight'].value
+	}
+	else
+	{
+		document.Form1.elements['hidfreight'].value = intIndex
+	}
+
+	var dblFreight = parseFloat(document.Form1.elements['FreightCostOp' + intIndex].value);
+	freightcost.innerHTML = '{CurrencySymbol}' + dblFreight.toFixed(2);
+	freighthandlingcost.innerHTML = '{CurrencySymbol}' + (dblFreight + dblHandling).toFixed(2);
+<!--TAXJavascript-->
+	subtotal.innerHTML = '{CurrencySymbol}' + (dblCostOfItems + dblFreight + dblHandling - dblDiscount).toFixed(2);
+	if (blnTaxFreight)
+	{
+		dblTaxCost = dblTax * (dblCostOfItems + dblFreight + dblHandling)
+		tax.innerHTML = '{CurrencySymbol}' + dblTaxCost.toFixed(2);
+	} else {
+		dblTaxCost = dblTax * (dblCostOfItems);
+		tax.innerHTML = '{CurrencySymbol}' + dblTaxCost.toFixed(2);
+	}	
+<!--/TAXJavascript-->
+	total.innerHTML = '{CurrencySymbol}' + (dblTaxCost + (dblCostOfItems + dblFreight + dblHandling - dblDiscount)).toFixed(2);
+<!--/FREIGHTJavascript-->
+	CalculateBudget();
+<!--/COST-->
+}
+
+function ValidData()
+{
+	<!--AdditionalEmailAddressRequired-->
+	<!--DeliveryAddressLogic-->
+	<!--PONumberLogic-->
+	<!--ExtraInfoLogic-->
+	if (!hasApproverEmail()) return false;
+	EnableFields();
+	
+	return true;
+}
+
+function EnableFields()
+{
+	var objElements;
+	var i;
+
+	objElements = document.getElementsByTagName("input");
+
+	for (i=0;i<objElements.length;i++)
+	{
+		if (objElements[i].disabled){objElements[i].value = "";}
+		objElements[i].disabled = false;
+	}
+	
+	objElements = document.getElementsByTagName("select");
+	for (i=0;i<objElements.length;i++)
+	{
+		if (objElements[i].disabled){objElements[i].selectedIndex = "0";}
+		objElements[i].disabled = false;
+	}
+}
+
+
+function CheckEntry(ctrlCur, strCaption, blnRequired, strLength, strType)
+{
+
+	if ((isWhitespace(document.Form1.elements[ctrlCur].value)) && blnRequired)
+	{
+		alert('You must enter a value for ' + strCaption);
+		document.Form1.elements[ctrlCur].focus();
+		return false;
+	}
+
+
+
+	if (strLength != '')
+	{
+
+		var intLen = parseInt(strLength);
+
+		if (intLen != 0)
+		{
+			if ((document.Form1.elements[ctrlCur].value.length != intLen) && (strType == 'exactly'))
+			{
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+				alert('Please enter ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length < intLen) && (strType == 'at least'))
+			{
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+				alert('Please enter at least ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length > intLen) && (strType == 'at most'))
+			{
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+				alert('Please enter at most ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+		}
+	}
+
+	
+	return true;
+}
+
+
+
+function isWhitespace (strCurrent)
+
+{   var i;
+	var whitespace = " \t\n\r";
+	
+    if (isEmpty(strCurrent)) return true;
+
+    for (i = 0; i < strCurrent.length; i++)
+    {   
+        var c = strCurrent.charAt(i);
+
+        if (whitespace.indexOf(c) == -1) return false;
+    }
+    
+    return true;
+}
+
+function isEmpty(strCurrent)
+{  
+	return ((strCurrent == null) || (strCurrent.length == 0))
+}
+
+function TogglePONumber(invoiceOnly)
+{
+	if(invoiceOnly)
+	{
+		if(eval(document.Form1.PaymentType))
+		{
+			if(document.Form1.elements['PaymentType'].options[document.Form1.elements['PaymentType'].selectedIndex].value=="Invoice")
+			{
+				document.getElementById('ponumberbox').style.display = "";
+			} else
+			{
+				document.getElementById('ponumberbox').style.display = "none";
+				document.Form1.elements['PONumber'].value = "";
+			}
+		}
+	}
+}
+
+function CheckApproverEmail()
+{
+	var strValue = document.Form1.elements['preapprovalselect'].value;
+	var strDisplay = '';
+
+	if (strValue.length > 0)
+	{
+		if (strValue.charAt(0) != '@')strDisplay = 'none'
+	}
+
+	document.Form1.elements['preapproval'].style.display = strDisplay;
+}
+
+
+function hasApproverEmail()
+{
+	var blnCheckEmail = false;
+	var strEmail = '';
+
+	if(document.getElementById('preapproval') != null)
+	{
+		blnCheckEmail = true
+		strEmail = document.getElementById('preapproval').value;
+	}
+
+	if(document.getElementById('preapprovalselect') != null)
+	{
+		blnCheckEmail = true;
+		if (document.getElementById('preapprovalselect').value.length > 0)
+		{
+			if (document.getElementById('preapprovalselect').value.charAt(0) != '@')strEmail = '';
+		}
+
+		strEmail += document.getElementById('preapprovalselect').value;
+
+	}
+
+	if(blnCheckEmail)
+	{
+
+
+		if (! isEmail(strEmail, false))
+		{
+			alert('Please enter an approver\'s email address');
+			return false
+		}
+		
+	}
+	return true;
+
+}
+
+function isEmail (s)
+{   if (isWhitespace(s)) 
+       if (isEmail.arguments.length == 1) return false;
+       else return (isEmail.arguments[1] == true);
+   
+    if (isWhitespace(s)) return false;
+    var i = 1;
+    var sLength = s.length;
+    
+    while ((i < sLength) && (s.charAt(i) != "@")) {i++}
+
+    if ((i >= sLength) || (s.charAt(i) != "@")) return false;
+    else i += 2;
+
+    // look for .
+    while ((i < sLength) && (s.charAt(i) != "."))
+    { i++
+    }
+    if ((i >= sLength - 1) || (s.charAt(i) != ".")) return false;
+    else return true;
+}
+
+
+function CalculateBudget()
+{
+<!--CalculateBudget-->
+	var dblTotal;
+	var blnCost = false;
+	var strBudget='';
+	
+	<!--COST-->
+	blnCost = true;
+	<!--/COST-->
+	{BudgetTotalJS}
+
+	if(document.getElementById("total"))
+	{
+		dblTotal = parseFloat(document.getElementById("total").innerHTML.replace('{CurrencySymbol}', ''));
+	} else {
+		dblTotal = parseFloat('{total}'.replace('{CurrencySymbol}', ''));
+	}
+	if(strBudget!='')
+	{
+		dblTotal = parseFloat('{budgettotal}'.replace('{CurrencySymbol}', ''));
+	}
+
+	var dblBalance = parseFloat('{availablebalance}'.replace('{CurrencySymbol}', '').replace(',', ''));
+	var dblFinal = dblBalance - dblTotal;
+
+	if (dblFinal <= 0)
+	{
+		if(document.getElementById("btnFinal")) document.getElementById("btnFinal").style.display = "none";
+		if(blnCost)
+		{
+			document.getElementById("spanbalance").innerHTML = "This exceeds your {allowancetime} Allowance by {CurrencySymbol}" + Math.abs(dblFinal).toFixed(2);
+		} else {
+			document.getElementById("spanbalance").innerHTML = "This exceeds your {allowancetime} Allowance";
+		}
+	} else {
+		if(document.getElementById("btnFinal")) document.getElementById("btnFinal").style.display = "";
+	}
+	
+	if(blnCost)
+	{
+		document.getElementById("budgetallowance").style.display = "";
+		document.getElementById("budgetcurrent").style.display = "";
+		document.getElementById("budgetavailable").style.display = "";
+	}
+<!--/CalculateBudget-->
+}
+
+function EIFGroupClicked(strVal)
+{
+	var aryGroups;
+	var iCntr=0;
+	var children;
+	var i;
+	var strGNList=document.getElementById('EIFGroupNameList').value;
+	
+	if(strVal == '')
+	{
+		for (i=0;i<document.Form1.eifgroup.length;i++) 
+		{
+			  if (document.Form1.eifgroup[i].checked) 
+			  { 
+					 strVal = document.Form1.eifgroup[i].value; 
+			  } 
+		}
+		if (strVal == '')
+		{
+			document.Form1.eifgroup[0].checked = true;
+			strVal = document.Form1.eifgroup[0].value;
+		}
+	}
+
+	aryGroups = strGNList.split("|");
+	for (iCntr=0;iCntr<aryGroups.length;iCntr++)
+	{
+		children = document.getElementById('div' + aryGroups[iCntr]).getElementsByTagName('*');
+		for (i=0;i<children.length;i++)
+		{
+				if(children[i].type=="text" || children[i].type=="select-one")
+				{
+					children[i].disabled = true;
+				}
+		}
+
+		children = document.getElementsByName("GroupItem" + aryGroups[iCntr]);
+
+		for (i=0;i<children.length;i++)
+		{
+			setOpacity(50, children[i]);
+		}
+	}
+	
+	
+	
+	children = document.getElementById('div' + strVal).getElementsByTagName('*');
+	for (i=0;i<children.length;i++)
+	{
+		children[i].disabled = false;
+		setOpacity(100, children[i]);
+	}
+}
+
+function setOpacity(opacity, objObject)
+{
+	// IE/Win
+	objObject.style.filter = "alpha(opacity:"+opacity+")";
+	objObject.style.zoom = 1;
+	
+	// Safari<1.2, Konqueror
+	objObject.style.KHTMLOpacity = opacity/100;
+  
+	// Older Mozilla and Firefox
+	objObject.style.MozOpacity = opacity/100;
+  
+	// Safari 1.2, newer Firefox and Mozilla, CSS3
+	objObject.style.opacity = opacity/100;
+}
+
+	function functionOnLoad(){
+		setup();
+	}
+
+</SCRIPT>
+</head>
+<!--TabTableStart-->
+<!--ORDERS-->
+<form action="Checkout.asp" method="post" name="Form1" onSubmit="return ValidData()">
+<input type="hidden" name="cc" value="{CC}">
+		<!--Budget-->
+                  <table border="0" cellpadding="0" cellspacing="0" class=wrapper>
+                  	<tr style='display:none' id=budgetallowance><td valign="top"><b>{allowancetime}&nbsp;Allowance:&nbsp;</b></td><td width=100%>{allowance}</td></tr>
+                  	<tr style='display:none' id=budgetcurrent><td valign="top"><b>Current&nbsp;Balance:</b></td><td width=100%>{balance}</td></tr>
+                  	<tr style='display:none' id=budgetavailable><td valign="top"><b>Available&nbsp;Balance:</b></td><td width=100%>{availablebalance}<br><br></td></tr>
+                  	<tr><td valign="top" colspan=2><font color=#ff0000><span id=spanbalance></span></font><br><br></td></tr>
+		  </table>
+		<!--/Budget-->
+<!--DeliveryDetails-->
+                  <TABLE width="100%" border="0" cellpadding="0" cellspacing="0" class=wrapper>
+                    <tr>
+						<td width="50%" valign="top" nowrap><b><u>Ordered By</u></b><br>{OrderDetails}</td>
+						<td width="50%" valign="top" nowrap><b><u>Deliver To</u></b><br>{DeliveryAddress}</td>
+						<td width="50%" valign="top" nowrap> <!--BillingColumn--><b><u>Bill To</u></b><br>{BillingAddress}<!--/BillingColumn--></td>
+					</tr>
+                  </TABLE><br>
+<!--/DeliveryDetails-->
+
+            <table border="0" cellpadding="10" cellspacing="0" class=wrapper width="100%" >
+              
+
+                    <TR>
+                      <TD align="left" class="tableheader" nowrap>Item #</TD>
+                      <TD align="left" class="tableheader">Date</TD>
+                      <TD align="left" class="tableheader">Qty</TD>
+                      <TD align="left" class="tableheader">Name</TD>
+                      <TD align="left" class="tableheader">Product</TD>
+                      <!--COST--><TD align="right" class="tableheader">Cost</TD><!--/COST-->
+					  <!--BudgetAllocation--><TD align="left" class="tableheader" align="right">Allocated to Budget</TD><!--/BudgetAllocation-->
+                      <!--Delivery--><TD align="left" class="tableheader">Delivery</TD><!--/Delivery-->
+                    </tr>
+<!--ROW-->
+                    <TR>
+                      <td id="firstcolumn" class="datatd">{OrderNumber}</TD>
+                      <td class="datatd">{Date}</TD>
+                      <td class="datatd">{Quantity}</TD>
+                      <td class="datatd">{EmpName}</TD>
+                      <td class="datatd" nowrap>{TemplateName}</TD>
+                      <!--COST--><td class="datatd" id=lastcolumn align="right">{Discount{Order_Id}} {Cost}</TD><!--/COST-->
+					  <!--BudgetAllocation--><td class="datatd" align="right">{CurrencySymbol}&nbsp;{AllocatedToBudget}</TD><!--/BudgetAllocation-->
+                      <!--Delivery--><td class="datatd">{Address}</TD><!--/Delivery-->
+                      </td>
+                    </tr>
+<!--Postage-->
+					<TR>
+                      <td id="firstcolumn" class="datatd"></TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd" colspan="2" align="right">Postage</TD>
+                      <!--COST--><td class="datatd" id=lastcolumn align="right">{Postage}</TD><!--/COST-->
+					  <!--BudgetAllocation--><td class="datatd"></TD><!--/BudgetAllocation-->
+                      <!--Delivery--><td class="datatd"></TD><!--/Delivery-->
+                    </tr>
+<!--/Postage-->
+<!--PurchaseListPrice-->
+					<TR>
+                      <td id=firstcolumn class="datatd"></TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd"></TD>
+					  <td class="datatd" colspan="2" align="right">Purchase List Price</TD>
+                      <!--COST--><td class="datatd" id=lastcolumn align="right">{PurchaseListPrice}</TD><!--/COST-->
+					  <!--BudgetAllocation--><td class="datatd"></TD><!--/BudgetAllocation-->
+                      <!--Delivery--><td class="datatd"></TD><!--/Delivery-->
+                    </tr>
+<!--/PurchaseListPrice-->
+<!--/ROW-->
+<!--COST-->
+              <TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>Cost of Items</b></TD><td class="DataTD" id="lastcolumn" align="right"><b>{totalcost}</b></TD></TR>			  
+              <!--HANDLING--><TR class="{ShowHideHandling}"><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{HandlingCaption}</b></TD><td class="DataTD" id="lastcolumn" align="right"><span id=handlingcost>{handling}</span></TD></TR><!--/HANDLING-->
+              <!--FREIGHT--><TR class="{ShowHideFreight}"><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{FreightCaption}</b></TD><td class="DataTD" id="lastcolumn" align="right"><span id=freightcost>{freight}</span></TD></TR><!--/FREIGHT-->
+			  <!--FREIGHTHANDLING--><TR class="{ShowHideFreightHandling}"><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{FreightCaption}</b></TD><td class="DataTD" id="lastcolumn" align="right"><span id=freighthandlingcost>{freighthandling}</span></TD></TR><!--/FREIGHTHANDLING-->
+              <!--DISCOUNT--><TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b><font color=ff0000>* Group Discount</font></b></TD><td class="DataTD" id="lastcolumn" align="right"><span><font color=ff0000>-{DiscountPrice}</font></span></TD></TR><!--/DISCOUNT-->
+			  <!--TAX--><TR><td class="subtotalrow" id="firstcolumn" colspan="5" align="right"><b>Total excl. {TaxLabel}</b></TD><td class="subtotalrow" id="lastcolumn" align="right"><b><span id=subtotal>{subtotal}</span></b></TD></TR>
+              <TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{TaxLabel}</b></TD><td class="DataTD" id="lastcolumn" align="right"><span id=tax>{tax}</span></TD></TR><!--/TAX-->
+              <TR><td class="totalrow" id="firstcolumn" colspan="5" align="right"><b>Total {taxinc} <!--TAXLABEL-->{TaxLabel}<!--/TAXLABEL--></b></TD><td class="totalrow" id="lastcolumn" align="right"><b><span id=total>{total}</span></b></b></TD></TR>
+<!--BudgetTotals-->
+			  <!--BudgetAllocation--><TR><td class="totalrow" id="firstcolumn" colspan="5" align="right"><b>Allocated To Budget</b></TD><td class="totalrow" id="lastcolumn" align="right"><b><span id=budgettotal>{budgettotal}</span></b></b></TD></TR><!--/BudgetAllocation-->
+			  <!--BudgetAllocation--><TR><td class="subtotalrow" id="firstcolumn" colspan="5" align="right"><b>Total to Pay</b></TD><td class="subtotalrow" id="lastcolumn" align="right"><b><span id=budgettotal>{budgettotaltopay}</span></b></b></TD></TR><!--/BudgetAllocation-->
+<!--/BudgetTotals-->
+<!--/COST-->
+            </table>
+
+<!--OrderDetails--><br>
+                  <TABLE width="100%" border="0" cellpadding="0" cellspacing="0" class=bordertable>
+
+                    <tr><td colspan=2 class=bordertableheader><b>Order Details</b></td></tr>
+                    <!--ExtraInfos-->
+                    <tr>
+                      <td class="TextBoxText" nowrap>{ExtraInfoCaption}&nbsp;&nbsp;</td>
+                      <td class="TextBoxText" width="100%">{ExtraInfoField}</td>
+                    </tr>
+                    <!--/ExtraInfos-->
+					<!--ExtraInfoGroup-->
+							<tr>
+								<td colspan=2>
+									<div id="div{GroupName}">
+										<table width="100%" cellspacing="0" cellpadding="0" border="0">
+										   <tr>
+											<td colspan="2" class=bordertableheader>
+												<!--ExtraInfoGroupSelect-->
+												<input type="radio" name="eifgroup" value="{GroupName}" onClick="EIFGroupClicked(this.value)" {GroupSelected}>
+												<!--/ExtraInfoGroupSelect-->
+												&nbsp;{GroupName}
+											</td>
+										   </tr>
+											<!--ExtraInfosGroup-->
+											<tr>
+											  <td class="TextBoxTextGroup" nowrap><div name="GroupItem{GroupName}" id="GroupItem{GroupName}" width=100%>{ExtraInfoCaption}</div></td>
+											  <td class="TextBoxText" width="100%"><div name="GroupItem{GroupName}" id="GroupItem{GroupName}" width=100%>{ExtraInfoField}</div></td>
+											</tr>
+											<!--/ExtraInfosGroup-->
+										</table>
+									</div>
+								</td>
+							</tr>
+					<!--/ExtraInfoGroup-->
+                    <!--PaymentType-->
+                    <tr>
+                      <td class="TextBoxText" nowrap>Payment Type&nbsp;&nbsp;</td>
+                      <td class="TextBoxText" width="100%">
+                        <SELECT name="PaymentType" onChange="TogglePONumber({invoiceOnly});">
+                          <OPTION VALUE="Credit Card">Credit Card</OPTION>
+                          <OPTION VALUE="Invoice">Invoice</OPTION>
+                        </SELECT>
+                      </td>
+                    </tr>
+                    <!--/PaymentType-->
+                    <!--PONumber--><tr id=ponumberbox>
+                      <td class="TextBoxText" nowrap>PO Number&nbsp;&nbsp;</td>
+                      <td width="100%"><Input type="text" value="{PONumber}" name="PONumber" class="TextBoxText" size ="20"></td>
+                    </tr><!--/PONumber-->
+                    <!--PreApproval--><tr>
+                      <td class="TextBoxText" nowrap>Approver's Email&nbsp;&nbsp;</td>
+                      <td width="100%">{PreApproval}</td>
+                    </tr><!--/PreApproval-->
+                  </TABLE>
+<!--/OrderDetails-->
+<!--AdditionalConfirmationEmail--><br>
+                  <TABLE width="100%" border="0" cellpadding="0" cellspacing="0" class=bordertable>
+
+                    <tr><td colspan=2 class=bordertableheader><b>Additional Confirmation Email</b></td></tr>
+                    <tr>
+                      <td class="TextBoxText" nowrap>Enter Email Address</td>
+                      <td class="TextBoxText" width="100%"><input type=text size=50 name=AdditionalEmailAddress id=AdditionalEmailAddress value="{AdditionalEmailAddress}"></td>
+                    </tr>
+                  </TABLE>
+<!--/AdditionalConfirmationEmail-->
+{freightoptions}
+
+<input type=hidden id="EIFGroupNameList" value="{EIFGroupNameList}">
+<input type=hidden name=DeliveryAddress value="{DA}">
+<input type=hidden name=Address1 value="{DA1}">
+<input type=hidden name=Address2 value="{DA2}">
+<input type=hidden name=Address3 value="{DA3}">
+<input type=hidden name=Address4 value="{DA4}">
+<input type=hidden name=Suburb value="{DASuburb}">
+<input type=hidden name=State value="{DAState}">
+<input type=hidden name=Postcode value="{DAPostcode}">
+<input type=hidden name=Country value="{DACountry}">
+<input type=hidden name=AttentionTo value="{DAAttention}">
+<input type=hidden name=AddressCompany value="{DAAddressCompany}">
+<input type=hidden name=AddressPhoneNumber value="{DAAddressPhoneNumber}">
+
+<input type=hidden name=BillingAddress value="{BA}">
+<input type=hidden name=BillingAddress1 value="{BA1}">
+<input type=hidden name=BillingAddress2 value="{BA2}">
+<input type=hidden name=BillingAddress3 value="{BA3}">
+<input type=hidden name=BillingAddress4 value="{BA4}">
+<input type=hidden name=BillingSuburb value="{BASuburb}">
+<input type=hidden name=BillingState value="{BAState}">
+<input type=hidden name=BillingPostcode value="{BAPostcode}">
+<input type=hidden name=BillingCountry value="{BACountry}">
+
+<p><input type="hidden" name="orderids" value="{orderids}">
+<input type="hidden" name="GroupDiscount" value="{GroupDiscount}">
+<input type="hidden" name="TotalAllocatedToBudget" value="{TotalAllocatedToBudget}">
+<input type="hidden" name="PayForBudget" value="{PayForBudget}">
+<input type="button" value="<< Return to Cart" onClick="javascript:history.go(-1)"><!--OrderButton-->&nbsp;<input type="submit" value="Submit Order >>" id=btnFinal name=btnFinal onClick="return CheckLiveStock();" style='display:{orderdisplay}'><!--/OrderButton--></p>
+<p></p>
+</form>
+
+		<Script>CalculateBudget();</Script>
+
+<!--/ORDERS-->
+<!--TabTableEnd-->

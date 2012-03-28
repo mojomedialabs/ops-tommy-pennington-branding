@@ -1,0 +1,1237 @@
+<script src="Include/ajaxsync.js" type="text/javascript"></script>
+<script src="Include/NexJob.js" type="text/javascript"></script>
+<script>
+	function stopRKey(evt) {
+	  var evt = (evt) ? evt : ((event) ? event : null);
+	  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+	  if ((evt.keyCode == 13) && (node.type!="textarea"))  {return false;}
+	}
+
+	document.onkeypress = stopRKey;
+
+	var blnOrder = false
+
+	function selectSeeds(cboCur) {
+		//<!--SEEDS-->
+		if (document.getElementById('hidSeedListId')) {
+			document.getElementById('hidSeedListId').value = cboCur.value;
+		}
+
+	    getListInfo(cboCur.value, '1', true);
+		//<!--/SEEDS-->
+	}
+
+	function getSeedList(strListId) {
+		//<!--Write-->
+		var objXML = null;
+
+		objXML = AjaxGet('AJAXOrder.asp?what=seedlist&list=' + strListId, null, false, objXML);
+
+	    if (objXML != null) {
+			document.getElementById('spnseedlist').innerHTML = objXML.responseText;
+		}
+		//<!--/Write-->
+	}
+
+	//<!--MULTIDROP-->
+	var intMDMaxDrops = {mdmaxdrops};
+	var intMDMaxQtyPerDrop = {mdmaxqtyperdrop};
+	var intMDMinQtyPerDrop = {mdminqtyperdrop};
+	var intMDMaxDaysBetween = {mdmaxdaysbetween};
+	var intMDMinDaysBetween = {mdmindaysbetween};
+	var intMDMinDaySeq = '{mdmindayseq}';
+
+
+	function checkdropqty(intIndex)
+	{
+	    var intDropCount = 0;
+	    var intTotalQtyReq  = 0;
+	    var intCurQty = 0;
+	    var intTotalQty = 0;
+	    var intMinCount = 1;
+	    var strTotalText = '';
+	    var strMinErrorText = '';
+	    var strMaxErrorText = '';
+	    var blnOK = true;
+
+	    if (document.getElementById('hidlistcountseed'))
+	    {
+	        intMinCount = parseInt(document.getElementById('hidlistcountseed').value);
+	        if (intMinCount < 1)intMinCount = 1;
+	    }
+
+	    if (document.getElementById('dropqty' + intIndex))
+	    {
+	        if (!isNaN(parseInt(document.getElementById('dropqty' + intIndex).value)))
+	        {
+	            if (parseInt(document.getElementById('dropqty' + intIndex).value) < 0)document.getElementById('dropqty' + intIndex).value = intMinCount;
+	        }
+	        else
+	        {
+	            document.getElementById('dropqty' + intIndex).value = intMinCount;
+	        }
+	    }
+
+	    if (intMinCount < intMDMinQtyPerDrop)intMinCount=intMDMinQtyPerDrop;
+
+	    if (document.getElementById('dropcount'))
+	    {
+	        if (document.getElementById('dropcount').value != '')intDropCount = parseInt(document.getElementById('dropcount').value);
+	    }
+
+	    if (document.getElementById('droptotalqty'))
+	    {
+	        if (document.getElementById('droptotalqty').value != '')intTotalQtyReq = parseInt(document.getElementById('droptotalqty').value);
+	    }
+
+
+	    for (var i=1; i<=intDropCount; i++)
+	    {
+	        intCurQty = 0;
+	        if (!isNaN(parseInt(document.getElementById('dropqty' + i).value)))
+	        {
+	            intCurQty = parseInt(document.getElementById('dropqty' + i).value);
+	            if (intCurQty < intMinCount)
+	            {
+	                if (strMinErrorText != '') strMinErrorText += ', ';
+	                strMinErrorText += i;
+	            }
+
+	            if ((intCurQty > intMDMaxQtyPerDrop) && (intMDMaxQtyPerDrop > 0))
+	            {
+	                if (strMaxErrorText != '') strMaxErrorText += ', ';
+	                strMaxErrorText += i;
+	            }
+
+	            intTotalQty += parseInt(document.getElementById('dropqty' + i).value);
+	        }
+	        if ((intCurQty + '') != document.getElementById('dropqty' + i).value)document.getElementById('dropqty' + i).value = intCurQty + '';
+	    }
+
+	    strMinErrorText = setMaxMinDropText(strMinErrorText, intMinCount, true);
+	    strMaxErrorText = setMaxMinDropText(strMaxErrorText, intMDMaxQtyPerDrop, false);
+
+	    strTotalText = '<p>Total Required from ' + intDropCount + ' drops: ' + intTotalQtyReq;
+
+	    if ((intTotalQtyReq != intTotalQty) || (strMinErrorText + strMaxErrorText) != '')
+	    {
+	        strTotalText += '<ul><font color="#ff0000">';
+	        blnOK = false;
+	        if (intTotalQtyReq != intTotalQty)
+	        {
+	            strTotalText += '<li>You have entered ' + Math.abs(intTotalQty - intTotalQtyReq) + ' records too ';
+	            if ((intTotalQty - intTotalQtyReq) > 0){strTotalText += ' many'}else{strTotalText += ' few'}
+	            strTotalText += '</li>';
+	        }
+
+	        strTotalText += strMinErrorText + strMaxErrorText + '</font></ul>'
+	    }
+	    strTotalText += '</p>';
+
+	    if (document.getElementById('spnTotalDropText'))document.getElementById('spnTotalDropText').innerHTML = strTotalText;
+
+	    return(blnOK);
+	}
+
+	function setMaxMinDropText(strText, intCount, blnMin)
+	{
+	    if (strText != '')
+	    {
+	        var intPos = strText.lastIndexOf(',');
+	        var strLeastMost = 'Maximum ';
+
+	        if (blnMin)strLeastMost = 'Minimum ';
+
+	        if (intPos > -1)
+	        {
+	            strText = 'drops ' + strText.substr(0,intPos) + ' and ' + strText.substr(intPos + 1);
+	        }
+	        else
+	        {
+	            strText = 'drop ' + strText;
+	        }
+
+	        strText = '<li>' + strLeastMost + ' value allowed for ' + strText + ' is ' + intCount + '</li>';
+	    }
+
+	    return(strText);
+	}
+
+
+	function getMultiDropAndSeedComboCount(intDropCount)
+	{
+	    var lngListCount = 0;
+	    var lngSeedCount = 0;
+
+	    if (document.getElementById('hidlistcount'))lngListCount=parseFloat(document.getElementById('hidlistcount').value);
+	    if (document.getElementById('hidlistcountseed'))lngSeedCount=parseFloat(document.getElementById('hidlistcountseed').value);
+
+	    return (lngListCount + (lngSeedCount * intDropCount));
+	}
+
+
+	function addDrop()
+	{
+	    var intDropCount = 0;
+	    var strDrops = '';
+	    var lngSeedCount = 0;
+	    var lngMinCount = 0;
+
+	    if (document.getElementById('tabDropTypes'))
+	    {
+	        if (document.getElementById('dropcount'))
+	        {
+	            if (document.getElementById('hidlistcountseed'))lngSeedCount=parseFloat(document.getElementById('hidlistcountseed').value);
+	            if (document.getElementById('dropcount').value != '')intDropCount = parseInt(document.getElementById('dropcount').value);
+
+	            if ((intMDMaxDrops > 0) && (intDropCount >= intMDMaxDrops))
+	            {
+	                alert(intMDMaxDrops + ' is the maximum number of drops allowed');
+	                return false;
+	            }
+
+
+	            for (var i=1; i<=intDropCount; i++)
+	            {
+	                if (i > 1)strDrops += ',';
+	                strDrops += document.getElementById('dropqty' + i).value;
+	            }
+	            intDropCount ++;
+
+	            if (intMDMinQtyPerDrop > lngSeedCount){lngMinCount = intMDMinQtyPerDrop}else{lngMinCount=lngSeedCount}
+
+	            var objXML = AjaxGet('AJAXOrder.asp?what=adddrops&temp={TemplateId}&btemp={BTemplateId}&index=' + intDropCount + '&seedcount=' + lngSeedCount + '&mincount=' + lngMinCount + '&mindays=' + intMDMinDaysBetween + '&maxdays=' + intMDMaxDaysBetween, null, false, objXML);
+
+	            document.getElementById('tabDropTypes').innerHTML += objXML.responseText;
+	            document.getElementById('dropcount').value = intDropCount;
+	            document.getElementById('droptotalqty').value=getMultiDropAndSeedComboCount(intDropCount);
+
+	            var aryQtys = strDrops.split(',');
+
+	            for (var i=0; i<aryQtys.length; i++)
+	            {
+	                strDrops += document.getElementById('dropqty' + (i+1)).value = aryQtys[i];
+	            }
+
+	            checkdropqty();
+	        }
+
+	    }
+	}
+
+	function removeDrop()
+	{
+	    var intDropCount = 0;
+
+	    if (document.getElementById('dropcount').value != '')
+	    {
+	        if (document.getElementById('dropcount').value != '0')
+	        {
+	            intDropCount = parseInt(document.getElementById('dropcount').value);
+
+	            document.getElementById('divdrop' + intDropCount).innerHTML = '';
+	            document.getElementById('divdrop' + intDropCount).style.display='none';
+	            document.getElementById('divdrop' + intDropCount).id = '';
+	            intDropCount-=1;
+	            document.getElementById('dropcount').value = intDropCount;
+	            document.getElementById('droptotalqty').value=getMultiDropAndSeedComboCount(intDropCount);
+
+	            checkdropqty();
+	        }
+	    }
+	}
+
+	//<!--/MULTIDROP-->
+
+	function getCountAndDrops(blnNew)
+	{
+
+	    var objXML = null;
+	    var strLists = '';
+	    var strURL = '';
+
+	//<!--MULTIDROP-->
+
+	    if (document.getElementById('hidSeedListId'))strLists = '&seedlist=' + document.getElementById('hidSeedListId').value;
+	    if (document.getElementById('hidListId'))strLists += '&list=' + document.getElementById('hidListId').value;
+
+	    if (strLists != '')
+	    {
+	        strURL = 'AJAXOrder.asp?what=getdrops' + strLists + '&temp={TemplateId}&btemp={BTemplateId}&ro={readonly}&order={Order}';
+	        if (blnNew)strURL += '&new=1';
+
+	        objXML = AjaxGet(strURL, null, false, objXML);
+
+	        if (objXML != null)
+	        {
+	            if (document.getElementById('tdmultidrop'))
+	            {
+	                document.getElementById('tdmultidrop').innerHTML = objXML.responseText;
+	                if (document.getElementById('dropcount'))
+	                {
+	                    if (document.getElementById('dropcount').value != '')
+	                    {
+	                        if (document.getElementById('divaddremdrops'))document.getElementById('divaddremdrops').style.display = '';
+	                    }
+	                 }
+	            }
+	        }
+	//<!--Write-->
+	        if (document.getElementById('droptotalqty'))
+	        {
+	        	    document.getElementById("spnQuantity").innerHTML = document.getElementById('droptotalqty').value;
+					setTotalQuantity(document.getElementById('droptotalqty').value);
+	        }
+	//<!--/Write-->
+
+	        if (document.getElementById('tabMultiDrop'))document.getElementById('tabMultiDrop').style.display = '';
+
+	   }
+	   else
+	   {
+	    if (document.getElementById('tabMultiDrop'))document.getElementById('tabMultiDrop').style.display = 'none';
+	   }
+
+	//<!--/MULTIDROP-->
+
+	//<!--Write-->
+	        if (!(document.getElementById('droptotalqty')))
+	        {
+	            if (document.getElementById('hidSeedListId'))strLists = '&list=' + document.getElementById('hidSeedListId').value;
+	            if (document.getElementById('hidListId'))strLists += '&list=' + document.getElementById('hidListId').value;
+
+	            objXML = AjaxGet('AJAXOrder.asp?what=listcount' + strLists, null, false, objXML);
+	            if (objXML != null)
+	            {
+	                document.getElementById("spnQuantity").innerHTML = objXML.responseText;
+	                setTotalQuantity(objXML.responseText);
+	            }
+	        }
+	//<!--/Write-->
+
+	}
+
+	function setTotalQuantity(lngTQ)
+	{
+	    for (var i=1; i<=document.getElementsByName('TotalQuantity').length; i++)
+	    {
+	        document.getElementsByName('TotalQuantity')[i-1].value = lngTQ;
+	    }
+	}
+
+	function getListInfo(strListId, strSeed, blnNew)
+	{
+
+	//<!--LIST-->
+
+	    var strSeedURL = '';
+	    var strLists = '';
+	    var objXML = null;
+	    var strListMappings = '{mappings}';
+	    var strSeedMappings = '{seedmappings}';
+	    var strMappings = '';
+
+
+	    if (document.getElementById('tabRules'))document.getElementById('tabRules').style.display = '';
+
+	    if (strSeed)
+	    {
+	        if (strSeed != '')strSeedURL = '&seed=1';
+	    }
+
+	    if (strSeedURL != ''){strSeed = 'Seed'}else{strSeed = ''}
+		if (strListId == undefined)strListId = '';
+
+	    if (strListId != '')
+	    {
+	        if (strSeed != ''){strMappings = strSeedMappings}else{strMappings = strListMappings}
+	        document.getElementById('spn' + strSeed + 'ListMappings').innerHTML = '<img src="images/process.gif" width="20" />';
+
+	        populateStationeryPH(AjaxGet('StationeryListMappings.aspx?{opssess}&ro={readonly}&stat={StatId}&list=' + strListId + '&mappings=' + strMappings + '&order={Order}' + strSeedURL, null, false, objXML), strSeed);
+			if (document.getElementById('btnCompose'))document.getElementById('btnCompose').style.display='';
+	    }
+	    else
+	    {
+	        if (strSeed == '')document.getElementById('spn' + strSeed + 'ListName').innerHTML = 'No Selection';
+		    document.getElementById('spn' + strSeed + 'ListMappings').innerHTML = '';
+	    }
+
+	    getCountAndDrops(blnNew);
+
+	//<!--Write-->
+	    getPrice();
+	//<!--/Write-->
+
+	//<!--/LIST-->
+	}
+
+	function setDate(strName, strDate, strNextDate, strIndex, blnOK)
+	{
+
+	    document.getElementById('spn' + strName).innerHTML = strDate;
+	    document.getElementById(strName).value = strDate;
+	    hs.close();
+
+	    if ((strNextDate != '') && (blnOK == false))
+	    {
+	        if (document.getElementById(strNextDate).value != '')
+	        {
+	            if (strIndex != '')alert('You need to select a new date for drop ' + (parseInt(strIndex) + 1));
+	            document.getElementById('spn' + strNextDate).innerHTML = '';
+	            document.getElementById(strNextDate).value = '';
+	        }
+	    }
+
+	    //document.getElementById(strName).focus();
+	}
+
+	function getListPrice(xmlHttp)
+	{
+	    var aryCountCost;
+
+	    if (xmlHttp != null)
+	    {
+
+		    if (xmlHttp.readyState==4)
+		    {
+		        aryCountCost = xmlHttp.responseText.split('|');
+		        if (aryCountCost.length > 1)
+		        {
+					if(aryCountCost[0]=='')aryCountCost[0] = '0';
+		            document.getElementById("spnQuantity").innerHTML = aryCountCost[0];
+					if (aryCountCost[0] !=null)setTotalQuantity(aryCountCost[0]);
+		            if (document.getElementById('theCost'))document.getElementById('theCost').innerHTML = '{CurrencySymbol} ' + aryCountCost[1];
+		        }
+		    }
+		}
+	}
+
+	function getList(strListId, strListName, strListPrice, strSeed)
+	{
+	//<!--Write-->
+	    var blnFoundSeed = false;
+
+	    if (strSeed != '')strSeed = 'Seed';
+
+	    document.getElementById('hid' + strSeed + 'ListId').value = strListId;
+
+	    if (strSeed == '')
+	    {
+	        blnFoundSeed = true;
+	        document.getElementById('spn' + strSeed + 'ListName').innerHTML = strListName;
+	    }
+	    else
+	    {
+	        if (document.getElementById('cboSeeds'))
+	        {
+	            for (var i=0; i < document.getElementById('cboSeeds').options.length; i++)
+	            {
+	                if (document.getElementById('cboSeeds').options[i].value == strListId)
+	                {
+	                    document.getElementById('cboSeeds').selectedIndex = i;
+	                    blnFoundSeed = true;
+	                    break;
+	                }
+	            }
+	        }
+	    }
+
+
+		if((strListPrice!='') && (strSeed == ''))
+		{
+			if(strListPrice!='0')
+			{
+				strListPrice = parseFloat(strListPrice);
+				document.getElementById('spnPurchasePrice').innerHTML = 'List Purchase Price: {CurrencySymbol} ' + strListPrice.toFixed(2);
+			}
+		}
+
+		if (! blnFoundSeed)getSeedList(strListId)
+	    getListInfo(strListId, strSeed, true);
+	    hs.close();
+
+	//<!--/Write-->
+	}
+
+
+	function getPrice()
+	{
+	//<!--Write-->
+	    var objXML = null;
+	    var strLists = '';
+
+	    if (document.getElementById('spnQuantity'))
+	    {
+
+	        if((document.getElementById('hidSeedListId')) || (document.getElementById('hidListId')))
+	        {
+	            if (document.getElementById('hidSeedListId'))
+	            {
+	                if (document.getElementById('hidSeedListId').value != '')strLists = '&list=' + document.getElementById('hidSeedListId').value;
+	            }
+	            if (document.getElementById('hidListId').value != '')strLists += '&list=' + document.getElementById('hidListId').value;
+
+	            if (strLists == '')
+	            {
+	                document.getElementById('spnQuantity').innerHTML = '0';
+	                if (document.getElementById('theCost'))document.getElementById('theCost').innerHTML = '';
+	            }
+	            else
+	            {
+	                if (document.getElementById('theCost'))document.getElementById('theCost').innerHTML = '<img src="images/process.gif" width="20" />';
+	                getListPrice(AjaxGet('AJAXOrder.asp?what=listcountcost' + strLists + '&qty=' + document.getElementById('TotalQuantity').value + '&temp={TemplateId}', null, false, objXML));
+
+	            }
+	   	    }
+	    }
+	//<!--/Write-->
+	}
+
+	function download(objThis, strWhat, strVP, strOrder)
+	{
+
+	  var strList = '';
+	  if (document.getElementById('hidListId'))strList = document.getElementById('hidListId').value;
+
+	  if ((document.getElementById('divdownloadlist')) && (strList != ''))document.getElementById('divdownloadlist').style.display='';
+	  if (strWhat == '')
+	  {
+	    objThis.href = 'DownloadProduct.asp?sid={StatId}&tid={TemplateId}&pid={PID}';
+	    hs.htmlExpand(objThis, {contentId: 'divdownload', outlineType: 'rounded-white', preserveContent: true, width: 300, height: 200 })
+	  }
+	  else
+	  {
+	    window.location = 'DownloadProduct.asp?download' + strWhat + '=1&sid={StatId}&pid={PID}&tid={TemplateId}&list=' + strList + '&order=' + strOrder + '&vp=' + strVP;
+	  }
+
+	}
+
+	function getRules()
+	{
+		document.getElementById("hsRules").href = 'VWebRules.aspx?list=' + document.getElementById('hidListId').value + '&statid={StatId}&cpid={PID}&theorder=' + document.getElementById('torder').value + '&order={Order}&{opssess}';
+		hs.htmlExpand(document.getElementById("hsRules"), {objectType: 'iframe', outlineType: 'rounded-white', wrapperClassName: 'highslide-wrapper', outlineWhileAnimating: true, preserveContent: false, width: 780 } )
+	}
+
+	function closeRules(lngTempOrder, strRules)
+	{
+
+	  if (parent.document.getElementById('torder'))parent.document.getElementById('torder').value=lngTempOrder;
+	  if (parent.document.getElementById('torder2'))parent.document.getElementById('torder2').value=lngTempOrder;
+	  if (parent.document.getElementById('torder3'))parent.document.getElementById('torder3').value=lngTempOrder;
+
+	  document.getElementById('tdRules').innerHTML = strRules;
+	  parent.hs.close()
+	}
+
+	function populateStationeryPH(xmlHttp, strSeed)
+	{
+	    var strLists = '';
+	    var strMappings = '';
+	    var objXML = null;
+
+	    if (xmlHttp != null)
+	    {
+		    if (xmlHttp.readyState==4)
+		    {
+		        strMappings = xmlHttp.responseText;
+		        if (strMappings != '')
+				{
+
+	<!--nodownloadonly-->
+	<!--Write-->
+					if (document.getElementById('tabRules'))document.getElementById('tabRules').style.display = '';
+	<!--/Write-->
+	<!--/nodownloadonly-->
+					document.getElementById('tabproof').style.display = '';
+				}
+				else
+				{
+					document.getElementById('tabproof').style.display = 'none';
+				}
+
+		        document.getElementById('spn' + strSeed + 'ListMappings').innerHTML = strMappings;
+
+		    }
+		}
+	}
+
+	function showVariableProof()
+	{
+	    var i=1;
+	    var strMappings = '';
+	    var strListId = '{listid}';
+	    var strSeedListId = '{seedlistid}';
+	    var strOrder = '{Order}';
+		var strURL = '';
+
+		if (document.getElementById('torder').value != '')strOrder = document.getElementById('torder').value;
+	    if (document.getElementById('hidListId').value != '')strListId = document.getElementById('hidListId').value;
+
+	    if (document.getElementById('cboSeeds'))strSeedListId = document.getElementById('cboSeeds').value;
+
+	    strMappings = getMappings('');
+	    if (strMappings != '')strURL = '&list=' + strListId + '&mappings=' + escape(strMappings);
+
+	    if (strSeedListId != '')
+	    {
+	        strMappings = getMappings('seed');
+	        if (strMappings != '')strURL += '&list=' + strSeedListId + '&mappings=' + escape(strMappings);
+	    }
+
+	    if (strURL != '')openWinVPrint('VWebProofArtwork.asp?order=' + strOrder + '&nav=true&currec=first&type=print&stat={StatId}&temp={TemplateId}&btemp={BTemplateId}' + strURL);
+	}
+
+	function getMappings(strSeed)
+	{
+
+	   var strMappings = '';
+
+	   if (document.getElementById('hid' + strSeed + 'phcount'))
+	    {
+
+	        for (i=0; i<parseInt(document.getElementById('hid' + strSeed + 'phcount').value); i++)
+	        {
+	            if (strMappings != '')strMappings += '|';
+	            strMappings += document.getElementById('hid' + strSeed + 'ph-' + i).value;
+	    	    strMappings += '|' + document.getElementById('select' + strSeed + 'ph-' + i).value + '|';
+	        }
+	    }
+
+	   return(strMappings);
+	}
+
+	function openWinVPrint(strURL)
+	{
+	    var winCurrent
+		winCurrent = window.open(strURL, "", "width=600,height=600,toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+		winCurrent.focus();
+	}
+
+	function ShowPrice(chkCur)
+	{
+
+	<!--Cost-->
+	    var strCost = "{Cost}";
+	    var strCostCap = "{CostCaption}";
+	    var strUrgentCost = "{UrgentCost}";
+	    var strUrgentCaption = "{UrgentCaption}";
+	    var blnUrgent = false
+
+	    if (document.getElementById('deliveryoptions'))
+	    {
+	        var strSelOp = document.getElementById('deliveryoptions').value;
+	        if (strSelOp != "")
+	        {
+	            if (strSelOp.charAt(0) == "1")blnUrgent = true;
+	        }
+	    }
+	    else
+	    {
+		    if (chkCur.checked)blnUrgent = true;
+	    }
+
+	    if (! blnUrgent)
+	    {
+	        document.getElementById('theCost').innerHTML = strCost;
+	        document.getElementById('theCostText').innerHTML = strCostCap;
+
+	    }
+	    else
+	    {
+	        document.getElementById('theCost').innerHTML = strUrgentCost;
+	        document.getElementById('theCostText').innerHTML = strUrgentCaption;
+	    }
+
+	<!--/Cost-->
+	}
+
+	function checkOrder()
+	{
+		if (typeof AdditionalOrderCheck =="function")
+		{
+			if(!AdditionalOrderCheck())
+			{
+				return false;
+			}
+		}
+
+		if (!hasApproverEmail()) return false;
+
+
+		if (blnOrder)
+		{
+			//   <!--PONumberCheck-->
+			alert('Please edit this order and enter a PO Number to continue.');
+			return false;
+			//   <!--/PONumberCheck-->
+
+	        if (! checkAllDropDates())return(false);
+
+			return confirm("Are you sure you want to Order your stationery now?");
+		}
+	}
+
+	function hasApproverEmail()
+	{
+		var blnCheckEmail = false;
+		var strEmail = '';
+
+		if(document.getElementById('preapproval') != null)
+		{
+			blnCheckEmail = true;
+			strEmail = document.getElementById('preapproval').value;
+		}
+
+		if(document.getElementById('preapprovalselect') != null)
+		{
+			blnCheckEmail = true;
+			if (document.getElementById('preapprovalselect').value.length > 0)
+			{
+				if (document.getElementById('preapprovalselect').value.charAt(0) != '@')strEmail = '';
+			}
+
+			strEmail += document.getElementById('preapprovalselect').value;
+
+		}
+
+		if(blnCheckEmail)
+		{
+
+
+			if (! isEmail(strEmail, false))
+			{
+				alert('Please enter an approver\'s email address');
+				return false
+			}
+
+		}
+		return true;
+
+	}
+
+	function CheckApproverEmail()
+	{
+
+	<!--PreApprovalJava-->
+		var strValue = '';
+		var strDisplay = '';
+
+	<!--PreApprovalSelect-->
+		strValue = document.getElementById('preapprovalselect').value;
+	<!--/PreApprovalSelect-->
+
+		if (strValue.length > 0)
+		{
+			if (strValue.charAt(0) != '@')strDisplay = 'none'
+		}
+
+		if(document.getElementById('preapproval') != null)document.getElementById('preapproval').style.display = strDisplay;
+	<!--/PreApprovalJava-->
+
+	}
+
+
+	function isEmail (s)
+	{   if (isWhitespace(s))
+	       if (isEmail.arguments.length == 1) return false;
+	       else return (isEmail.arguments[1] == true);
+
+	    if (isWhitespace(s)) return false;
+
+	    var i = 1;
+	    var sLength = s.length;
+
+	    while ((i < sLength) && (s.charAt(i) != "@")) {i++}
+
+	    if ((i >= sLength) || (s.charAt(i) != "@")) return false;
+	    else i += 2;
+
+	    // look for .
+	    while ((i < sLength) && (s.charAt(i) != "."))
+	    { i++
+	    }
+	    if ((i >= sLength - 1) || (s.charAt(i) != ".")) return false;
+	    else return true;
+	}
+
+
+
+	function isWhitespace (strCurrent)
+
+	{   var i;
+		var whitespace = " \t\n\r";
+
+	    if (isEmpty(strCurrent)) return true;
+
+	    for (i = 0; i < strCurrent.length; i++)
+	    {
+	        var c = strCurrent.charAt(i);
+
+	        if (whitespace.indexOf(c) == -1) return false;
+	    }
+
+	    return true;
+	}
+
+	function isEmpty(strCurrent)
+	{
+		return ((strCurrent == null) || (strCurrent.length == 0))
+	}
+
+	function CheckApproveArtwork() {
+		var blnResult=false;
+		var strValue='';
+
+	    if (! checkAllDropDates())return(false);
+
+		if(document.getElementById('chkartworkapprove')) {
+			if(document.getElementById('chkartworkapprove').checked) {
+
+			} else {
+				alert("Please check the Approval box to continue.");
+				return false;
+			}
+		}
+		if(document.getElementById('NJV')) {
+			if(document.getElementById('NJV').type != "hidden")
+			{
+				strValue=document.getElementById('NJV').value;
+				blnResult=IsValid('int', strValue);
+				if(strValue=='0') blnResult=false;
+				if(blnResult==false)
+				{
+					alert("Please enter a valid quantity");
+					return false;
+				}
+			}
+		}
+	}
+
+	function checkAllDropDates()
+	{
+	    var blnOK = true;
+	//<!--MULTIDROP-->
+
+		if (document.getElementById('dropcount'))
+		{
+		    if (document.getElementById('dropcount').value != '')
+		    {
+		        for (var i=1; i <= parseInt(document.getElementById('dropcount').value); i++)
+		        {
+		            if(document.getElementById('txtDrop' + i).value == '')
+		            {
+		                alert('You have not selected a date for drop ' + i);
+		                blnOK = false;
+		                break;
+		            }
+		        }
+		    }
+
+		}
+
+		if (blnOK)
+		{
+			blnOK = checkdropqty();
+			if (!blnOK)alert('Incorrect Drop Quantities Entered');
+		}
+
+		if (blnOK)
+		{
+			if (document.getElementById('hidmddroperror'))
+			{
+				alert('Your list does not meet required drop rules');
+				blnOK = false;
+			}
+		}
+
+	//<!--/MULTIDROP-->
+
+		return(blnOK);
+	}
+
+	function UpdateComment(ddlComments)
+	{
+	  document.getElementById('precomments').value = ddlComments.options[ddlComments.selectedIndex].value;
+	}
+
+</script>
+<!--OrderDetails-->
+<!--PreApprover-->
+<form method="post">
+	<table width="100%" border="0" cellspacing="2" cellpadding="2" class="bordertable" width="300">
+		<tr>
+			<td class="bordertableheader">{OrderNumber} Approval</td>
+		</tr>
+		<tr>
+			<td valign="center"><b>Comments:</b><br />{CommentReasons}<textarea cols="43" rows="4" name="precomments" id="precomments"></textarea></td>
+		</tr>
+		<tr>
+			<td align="center"><input type="submit" name="btnApprove" value="Approve" />&nbsp;&nbsp;<input type="submit" name="btnDecline" value="Decline" /></td>
+		</tr>
+	</table>
+	<br />
+</form>
+<!--/PreApprover-->
+<!--/Write-->
+<!--/OrderDetails-->
+<!--Write-->
+<form action="Order.asp" method="Post" {formtarget} id="form1" name="form1" onSubmit="return checkOrder();">
+	<!--/Write-->
+	<input type="hidden" name="torder" id="torder" value="{torder}" />
+	<TABLE width="100%" border="0" cellpadding="1" cellspacing="0" valign="top" class="bordertable" id="proofScreenOrderDetails">
+		<!--CostCentre-->
+		<TR>
+			<TD width="150" class="DescriptionText">Customer</TD>
+			<td width="400" class="DescriptionText">{CostCentre}</td>
+		</TR>
+		<!--/CostCentre-->
+		<!--TemplateName-->
+		<TR>
+			<TD width="150" class="DescriptionText">Name</TD>
+			<td width="400" class="DescriptionText">{TemplateName}</td>
+		</TR>
+		<!--/TemplateName-->
+		<!--OrderDetails-->
+		<!--ExtraInfos-->
+		<tr>
+			<td width="100" class="DescriptionText">{ExtraInfoCaption}</td>
+			<td width="400" class="DescriptionText">{ExtraInfoField}</td>
+		</tr>
+		<!--/ExtraInfos-->
+		<!--ExtraInfoGroup-->
+		<tr>
+			<td colspan="2">
+				<div id="div{GroupName}">
+					<table width="100%" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td colspan="2" class="bordertableheader">
+								{GroupName}
+							</td>
+						</tr>
+						<!--ExtraInfosGroup-->
+						<tr>
+							<td width="120" class="TextBoxTextGroup">{ExtraInfoCaption}</td>
+							<td class="TextBoxText">{ExtraInfoField}</td>
+						</tr>
+						<!--/ExtraInfosGroup-->
+					</table>
+				</div>
+			</td>
+		</tr>
+		<!--/ExtraInfoGroup-->
+		<!--Quantity-->
+		<TR>
+			<TD width="100" class="DescriptionText">Quantity</TD>
+			<td width="400" class="DescriptionText"><span id="spnQuantity">{NoBoxes}</span></td>
+		</TR>
+		<!--/Quantity-->
+		<!--Cost-->
+		<TR>
+			<TD width="100" class="DescriptionText">
+				<span id="theCostText">
+					Price<!--{DisplayCostCaption}-->
+				</span>
+			</TD>
+			<td width="400" class="DescriptionText"><span id="theCost">{DisplayCost}</span></td>
+		</TR>
+		<!--/Cost-->
+		<!--ItemOnHand-->
+		<TR>
+			<TD width="100" class="DescriptionText"><span id="theLevelText">Stock</span></TD>
+			<TD width="400" class="DescriptionText"><span id="theLevel">{ItemOnHand}</span></TD>
+		</TR>
+		<!--/ItemOnHand-->
+		<!--DeliveryAddress-->
+		<TR>
+			<TD width="100" class="DescriptionText">Delivery Address </TD>
+			<td width="400" class="DescriptionText">{DelAddress}</td>
+		</TR>
+		<!--/DeliveryAddress-->
+		<TR>
+			<TD width="100" class="DescriptionText">Date </TD>
+			<td width="400" class="DescriptionText">{Date}</td>
+		</TR>
+		<!--PONumber-->
+		<TR>
+			<TD width="100" class="DescriptionText">PO Number </TD>
+			<td width="400" class="DescriptionText">{PONumber}</td>
+		</TR>
+		<!--/PONumber-->
+		<TR id="rowComments">
+			<TD width="100" class="DescriptionText">Comments </TD>
+			<td width="400" class="DescriptionText">
+				<!--com-->
+				<TEXTAREA class="textboxtext" rows="3" cols="25" name="Comments" id="Comments">{Comments}</TEXTAREA>
+				<!--/com-->
+			</td>
+		</TR>
+		<!--Urgent-->
+		<tr>
+			<td class="TextBoxText">{DeliveryCaption}</td>
+			<td class="TextBoxText" valign="center">
+				<!--ur--><Input type="checkbox" name="Urgent" onClick="ShowPrice(this)" {urgentcheck} /><!--/ur-->&nbsp;
+			</td>
+		</tr>
+		<!--/Urgent-->
+		<!--PreApproval-->
+		<tr>
+			<td class="TextBoxText">Approver's Email</td>
+			<td class="TextBoxText" valign="center">{PreApproval}&nbsp;</td>
+		</tr>
+		<!--/PreApproval-->
+		<!--/OrderDetails-->
+		<!--SaveAs-->
+		<tr>
+			<td class="TextBoxText">Item Name</td>
+			<td class="TextBoxText" valign="center">
+				<!--OrderName--><input type="text" name="txtSaveAs" value="{OrderName}" size="20" maxlength="200" /><!--/OrderName-->
+			</td>
+		</tr>
+		<!--/SaveAs-->
+	</TABLE>
+	<br />
+	<!--FileUpload-->
+	<TABLE width="100%" border="0" cellpadding="1" cellspacing="0" valign="top" class="bordertable">
+		<TR>
+			<td colspan="2" align="left" class="bordertableheader">File Attachment</td>
+		</tr>
+		<tr>
+			<td class="TextBoxText">{FileUploadCaption}<br /><a href="UploadAttachment.asp?tid={TemplateId}" id="hsfileattachment" onclick="return hs.htmlExpand(this, { outlineType: 'rounded-white',
+																		wrapperClassName: 'highslide-wrapper', objectType: 'iframe', preserveContent: false, width:400} )" class="highslide">Click here to upload file</a></td>
+		</tr>
+		<tr>
+			<td class="TextBoxText">
+				<span id="fileuploadspan">{uploadfilename}</span>
+				<input type="hidden" name="fileupload" id="fileupload" value="{uploadfile}" />
+				<input type="hidden" name="fileuploadname" id="fileuploadname" value="{uploadfilename}" />
+			</td>
+		</tr>
+	</TABLE>
+	<BR />
+	<!--/FileUpload-->
+	<!--LIST-->
+	<TABLE width="100%" border="0" cellpadding="1" cellspacing="0" class="bordertable">
+		<tr>
+			<td colspan="2" style="padding: 0px">
+				<table class="wrapper" cellpadding="0" cellspacing="0" width="100%" id="Table1">
+					<tr>
+						<td class="bordertableheader">List&nbsp;Data</td>
+						<td class="bordertableheader">
+							<!--Write-->
+							<input type="button" value="Click To Select Data" onclick="document.getElementById('ifListMan').src='VWebUploadList.aspx?{opssess}&amp;TemplateId={TemplateId}&amp;ran=' + Math.random(); return hs.htmlExpand(this, { contentId: 'listselectupload',
+			        outlineType: 'rounded-white', outlineWhileAnimating: true } )" class="highslide" />
+							<!--/Write-->
+						</td>
+					</tr>
+					<tr>
+						<td>List Name</td>
+						<td>
+							<input type="hidden" name="hidListId" id="hidListId" value="{listid}" /><span id="spnListName">{listname}</span>
+							<div class="highslide-html-content" id="listselectupload" style="width: 800px; height: 700px">
+								<div style="height:20px; padding: 2px">
+									<a href="#" onclick="return hs.close(this)" class="control">Close</a>
+									<a href="#" onclick="return false" class="highslide-move control">Move</a>
+								</div>
+								<div class="highslide-body" style="padding: 0 5px 5px 5px;">
+									<iframe src="" style="width:99%; height:99%" frameborder="0" id="ifListMan"></iframe>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2"><span id="spnPurchasePrice"></span></td>
+					</tr>
+					<tr>
+						<td colspan="2"><span id="spnListMappings" {HideMappings}></span></td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--SEEDS-->
+		<tr>
+			<td colspan="2" style="padding: 0px">
+				<table class="wrapper" cellpadding="0" cellspacing="0" width="100%" id="tabSeeds">
+					<tr>
+						<td class="bordertableheader">Seed&nbsp;Data</td>
+						<td class="bordertableheader">
+							<!--Write-->
+							<input type="button" value="Click To Upload Data" onclick="document.getElementById('ifSeedListMan').src='VWebUploadList.aspx?{opssess}&amp;TemplateId={TemplateId}&amp;seed=1&amp;ran=' + Math.random(); return hs.htmlExpand(this, { contentId: 'seedlistselectupload',
+			        outlineType: 'rounded-white', outlineWhileAnimating: true } )" class="highslide" />
+							<div class="highslide-html-content" id="seedlistselectupload" style="width: 800px; height: 500px">
+								<div style="height:20px; padding: 2px">
+									<a href="#" onclick="return hs.close(this)" class="control">Close</a>
+									<a href="#" onclick="return false" class="highslide-move control">Move</a>
+								</div>
+								<div class="highslide-body" style="padding: 0 5px 5px 5px;">
+									<iframe src="" style="width:770px; height:470px" frameborder="0" id="ifSeedListMan"></iframe>
+								</div>
+							</div>
+							<!--/Write-->
+						</td>
+					</tr>
+					<tr>
+						<td>Seed List</td>
+						<td><span id="spnseedlist">{seeds}</span><input type="hidden" name="hidSeedListId" id="hidSeedListId" value="{seedlistid}" /></td>
+					</tr>
+					<tr>
+						<td colspan="2"><span id="spnSeedListMappings" {HideSeedMappings}></span></td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--/SEEDS-->
+		<!--RULES-->
+		<tr>
+			<td colspan="2" style="padding: 0px">
+				<table class="wrapper" cellpadding="0" cellspacing="0" width="100%" id="tabRules" style="display:none">
+					<tr>
+						<td class="bordertableheader">Rules</td>
+						<td class="bordertableheader">
+							<!--Write--><input type="button" name="btnRules" value="Click To Add Rules" onclick="getRules()" /><a href="#" id="hsRules"></a><!--/Write-->
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" id="tdRules">{Rules}</td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--/RULES-->
+		<!--MULTIDROP-->
+		<tr>
+			<td colspan="2" style="padding: 0px">
+				<table class="wrapper" cellpadding="0" cellspacing="0" width="100%" id="tabMultiDrop" style="display:none">
+					<tr>
+						<td class="bordertableheader">Drops</td>
+						<td class="bordertableheader">
+							<!--Write-->
+							<div id="divaddremdrops" style="display:none"><input type="button" onclick="addDrop()" value="add drop" /> <input type="button" onclick="removeDrop()" value="remove drop" /></div>
+							<!--/Write-->
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" id="tdmultidrop"></td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--/MULTIDROP-->
+		<tr>
+			<td colspan="2" style="padding: 0px">
+				<table class="wrapper" cellpadding="0" cellspacing="0" width="100%" id="tabproof" style="display:none">
+					<tr>
+						<td class="bordertableheader" colspan="2">Proof with Variable Data</td>
+					</tr>
+					<tr>
+						<td colspan="2"><a href="javascript:showVariableProof()"><img src="images/pdf.gif" border="0" />Click here to proof with data</a><a href="#" id="hsProof"></a></td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</TABLE>
+	<!--/LIST-->
+	<script>
+		function LoadHS(strNJId)
+		{
+			document.getElementById("hsInsertLink"+strNJId).href = 'NexJobPage.asp?ID=' + strNJId + '&thin=yes&branding=no&pid={PID}&varqty=' + document.getElementById('spnQuantity').innerHTML;
+			hs.htmlExpand(document.getElementById("hsInsertLink"+strNJId), {objectType: 'iframe', outlineType: 'rounded-white', wrapperClassName: 'highslide-wrapper', outlineWhileAnimating: true, preserveContent: false, width: 700 } )
+		}
+	</script>
+	<input type="hidden" id="insertcost" name="insertcost" value="" />
+	<!--NexJobPricing-->
+	<script>
+		function UpdatePrice()
+		{
+			if (document.getElementById('theCost'))document.getElementById('theCost').innerHTML = document.getElementById("NJPriceTag").innerHTML
+		}
+	</script>
+	<input type="hidden" id="TNJId" name="TNJId" value="{TemplateNexJobPageId}" />
+	<input type="hidden" id="TNJCollection" name="TNJCollection" value="" />
+	<input type="hidden" id="TNJPrice" name="TNJPrice" value="" />
+	<input type="hidden" id="TNJQuantity" name="TNJQuantity" value="" />
+	<input type="hidden" name="TNJVarQty" id="TNJVarQty" value="{NJVarQty}" />
+	<br />
+	<TABLE width="100%" border="0" cellpadding="1" cellspacing="0" valign="top" class="bordertable">
+		<TR>
+			<td align="left" class="bordertableheader">Options</td>
+		</tr>
+		<tr>
+			<td class="TextBoxText">
+				<div id="NJOptions"></div>
+			</td>
+		</tr>
+	</TABLE>
+	<!--/NexJobPricing-->
+	<script>
+		LoadNexJob();
+	</script>
+	<!--Write-->
+	<!--ApproveArtwork-->
+	<p>{ApproveArtworkText}</p>
+	<!--/ApproveArtwork-->
+	<!--/Write-->
+	<input type="hidden" value="{TemplateId}" name="Template" />
+	<table border="0" align="bottom" width="100%">
+		<tr>
+			<td align="right">
+				<input type="hidden" name="BC" value="{StatId}" />
+				<!--HiddenVariables-->
+				<!--HiddenEVariables-->
+				<table border="0" width="100%" align="right">
+					<tr>
+						<td align="right" nowrap>
+							<!--download-->
+							<a href="#" id="hrefdownload"></a><input type="button" onclick="download(document.getElementById('hrefdownload'), '', '', '');" value="   Download   " />
+							<div id="divdownload" class="highslide-html-content">
+								<h1>Download</h1>
+								<div>
+									<!--downloadgenerated-->
+									<p><a href="javascript:download(this, 'pdf', '1', '{Order}');"><img src="images/ptr.gif" border="0" /> Download composed print ready PDF</a></p>
+									<!--/downloadgenerated-->
+									<!--downloadgeneratedprogress-->
+									<p>Composition Status: {vprintgeneratorstatus}</p>
+									<!--/downloadgeneratedprogress-->
+									<!--downloadhires-->
+									<p><a href="javascript:download(this, 'pdf', '', '');"><img src="images/ptr.gif" border="0" /> Download print ready PDF</a></p>
+									<!--/downloadhires-->
+									<!--downloadlist-->
+									<span id="divdownloadlist" style="display:none">
+										<p><a href="javascript:download(this, 'list', '', '');"><img src="images/ptr.gif" border="0" /> Download List</a></p>
+										&nbsp;
+									</span>
+									<!--/downloadlist-->
+									<p><input type="button" value="  close  " onclick="hs.close()" /></p>
+								</div>
+							</div>
+							<!--/download-->
+							<!--Write-->
+							<!--Variable--><input type="submit" name="btnVariable" value="{VariableCaption}" /><!--CASS-->&nbsp;<input type="submit" name="btnCASS" value="Vertify Addresses &gt;&gt;" /><!--/CASS--><!--/Variable-->
+							<!--VPrintCompose--><input type="submit" name="btnCompose" id="btnCompose" value=" Compose " onClick="javascript:blnOrder=false;" {showcompose} /><!--/VPrintCompose-->
+							<!--Save--><input type="submit" name="btnSave" value="  Save  " onClick="javascript:blnOrder=false;" /><!--/Save-->
+							<!--Order--><input type="submit" value="Order &gt;&gt;" name="btnOrder" onClick="javascript:blnOrder=true; return CheckApproveArtwork();" /><!--/Order-->
+							<!--Cart--><input type="submit" name="btnCart" id="btnCart" value="{CartCaption}" onClick="return CheckApproveArtwork();" /><!--/Cart-->
+							<!--VWeb--><input type="submit" name="btnVWeb" value="{CampaignCaption}" /><!--/VWeb-->
+							<!--/Write-->
+						</TD>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>
+<img src="images/spacer.gif" width="250" height="1" />

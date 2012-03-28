@@ -1,0 +1,184 @@
+@charset "utf-8";
+
+/*@font-face {
+	font-family: BebasNeue;
+	src: url("http://marketing-candy.com/wp-includes/BebasNeue.otf");
+}*/
+
+@font-face {
+	font-family: BebasNeue;
+	src: url("http://marketing-candy.com/wp-includes/BebasNeue.eot");
+	src: url("http://marketing-candy.com/wp-includes/BebasNeue.eot#iefix") format("embedded-opentype"),
+		 url("http://marketing-candy.com/wp-includes/BebasNeue.woff") format("woff"),
+		 url("http://marketing-candy.com/wp-includes/BebasNeue.ttf") format("truetype"),
+		 url("http://marketing-candy.com/wp-includes/BebasNeue.svg#BebasNeue") format("svg");
+	font-weight: normal;
+	font-style: normal;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	background: #86d5ed;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	height: 100%;
+}
+
+#content {
+	background: #ffffff;
+	min-height: 100%;
+	margin: 0 auto;
+	width: 980px;
+}
+
+#content header {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/loginheader.png");
+	height: 134px;
+	margin: 0 auto;
+	width: 958px;
+}
+
+#logo {
+	float: left;
+	padding-left: 30px;
+	padding-top: 30px;
+}
+
+#social {
+	float: right;
+	padding-right: 30px;
+	padding-top: 25px;
+	width: 22px;
+}
+
+#social a {
+	display: block;
+	height: 22px;
+	margin-bottom: 4px;
+	width: 22px;
+}
+
+#rss {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/socialicons.png") no-repeat scroll 0 0 transparent;
+}
+
+#twitter {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/socialicons.png") no-repeat scroll -22px 0 transparent;
+}
+
+#facebook {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/socialicons.png") no-repeat scroll -88px 0 transparent;
+}
+
+#linkedin {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/socialicons.png") no-repeat scroll -66px 0 transparent;
+}
+
+#rss:hover {
+	background-position: 0 -22px;
+}
+
+#twitter:hover {
+	background-position: -22px -22px;
+}
+
+#facebook:hover {
+	background-position: -88px -22px;
+}
+
+#linkedin:hover {
+	background-position: -66px -22px;
+}
+
+#call-to-action {
+	border-right: 1px solid #a7a9ac;
+	float: left;
+	list-style: none;
+	margin: 20px 0 0 0;
+	padding: 0 40px;
+	width: 256px;
+}
+
+#welcome {
+	color: #333333;
+	float: right;
+	font-weight: normal;
+	margin: 25px 35px 45px 35px;
+	text-align: center;
+	width: 573px;
+}
+
+#login {
+	background-color: #afe1f4;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#afe1f4), to(#00aedb)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #afe1f4, #00aedb); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	background-image:    -moz-linear-gradient(top, #afe1f4, #00aedb); /* FF3.6 */
+	background-image:     -ms-linear-gradient(top, #afe1f4, #00aedb); /* IE10 */
+	background-image:      -o-linear-gradient(top, #afe1f4, #00aedb); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, #afe1f4, #00aedb);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#afe1f4', EndColorStr='#00aedb'); /* IE6–IE9 */
+	color: #591f00;
+	float: right;
+	margin: 0 35px;
+	width: 573px;
+}
+
+#login-image {
+	float: left;
+	margin: 30px 0 0 30px;
+}
+
+#fields {
+	float: right;
+	margin-right: 30px;
+}
+
+label {
+	font-family: BebasNeue, Arial, sans-serif;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+}
+
+input[type="text"], input[type="password"] {
+	border: none;
+	font-size: 18px;
+	height: 30px;
+	width: 290px;
+}
+
+input[type="submit"] {
+	background: url("http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mc/Include/submitbutton.png");
+	border: 0;
+	color: #591f00;
+	font-weight: bold;
+	height: 30px;
+	margin-left: 100px;
+	text-indent: -20px;
+	text-transform: uppercase;
+	width: 99px;
+}
+
+input[type="submit"]:active {
+	color: #ffffff;
+}
+
+#error-logging-in {
+	background: #f5b5a9 url(error.png) no-repeat 15px center;
+	border: 1px solid #eb5339;
+	display: none;
+	left: 5px;
+	min-height: 16px;
+	position: absolute;
+	padding: 10px 15px 10px 62px;
+	text-align: left;
+	top: 5px;
+	width: 300px;
+	z-index: 10;
+}
+
+#error-logging-in {
+	font-weight: bold;
+	margin-bottom: 10px;
+}

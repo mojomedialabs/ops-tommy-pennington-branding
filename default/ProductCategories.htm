@@ -1,0 +1,763 @@
+<script type="text/javascript" src="Include/highslide.js"></script>
+<script type="text/javascript" src="Include/highslide.cfg.js"></script>
+<style type="text/css">
+	TD.class1{BACKGROUND-COLOR: #EFEFEF;}
+	TD.class2{BACKGROUND-COLOR: #fef8d6;}
+	.subcaption, .clscost
+	{
+		COLOR: #000000;
+		FONT-FAMILY: Verdana, Arial;
+		FONT-SIZE: 7pt;
+		FONT-WEIGHT: bold;
+	}
+	.stock
+	{
+		COLOR: #000000;
+		FONT-FAMILY: Verdana, Arial;
+		FONT-SIZE: 7pt;
+	}
+	.highslide {
+		cursor: url(highslidegraphics/zoomin.cur), pointer;
+		outline: none;
+	}
+	.highslide-active-anchor img {
+		visibility: hidden;
+	}
+	.highslide img {
+		border: 1px solid gray;
+	}
+	.highslide:hover img {
+		border: 1px solid black;
+	}
+	.highslide-wrapper {
+		background: white;
+	}
+	.highslide-image {
+		border-bottom: 1px solid white;
+	}
+	.highslide-image-blur {
+	}
+	.highslide-caption {
+		display: none;
+		border-bottom: 1px solid white;
+		font-family: Verdana, Helvetica;
+		font-size: 10pt;
+		padding: 5px;
+		background-color: silver;
+	}
+	.highslide-loading {
+		display: block;
+		color: black;
+		font-size: 8pt;
+		font-family: sans-serif;
+		font-weight: bold;
+		text-decoration: none;
+		padding: 2px;
+		border: 1px solid black;
+		background-color: white;
+		padding-left: 22px;
+		background-image: url(highslidegraphics/loader.white.gif);
+		background-repeat: no-repeat;
+		background-position: 3px 1px;
+	}
+	a.highslide-credits,a.highslide-credits i {
+		padding: 2px;
+		color: silver;
+		text-decoration: none;
+		font-size: 10px;
+	}
+	a.highslide-credits:hover,a.highslide-credits:hover i {
+		color: white;
+		background-color: gray;
+	}
+	a.highslide-full-expand {
+		background: url(highslidegraphics/fullexpand.gif) no-repeat;
+		display: block;
+		margin: 0 10px 10px 0;
+		width: 34px;
+		height: 34px;
+	}
+	.highslide-overlay {
+		display: none;
+	}
+	.closebutton {
+		position: relative;
+		top: -15px;
+		left: 15px;
+		width: 30px;
+		height: 30px;
+		cursor: hand; /* ie */
+		cursor: pointer; /* w3c */
+		background: url(highslidegraphics/close.png);
+		/* For IE6, remove background and add filter */
+		_background: none;
+		_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='highslidegraphics/close.png', sizingMethod='scale');
+	}
+
+	/* These must always be last */
+	.highslide-display-block {
+		display: block;
+	}
+	.highslide-display-none {
+		display: none;
+	}
+
+	/* Self rendering */
+	.highslide-wrapper {
+		background-color: white;
+	}
+	.highslide-wrapper .highslide-html-content {
+		width: 400px;
+		padding: 0 5px 5px 5px;
+	}
+	.highslide-wrapper .highslide-header {
+		padding-bottom: 5px;
+	}
+	.highslide-wrapper .highslide-header ul {
+		margin: 0;
+		padding: 0;
+		text-align: right;
+	}
+	.highslide-wrapper .highslide-header ul li {
+		display: inline;
+		padding-left: 1em;
+	}
+	.highslide-wrapper .highslide-header ul li.highslide-previous, .highslide-wrapper .highslide-header ul li.highslide-next {
+		display: none;
+	}
+	.highslide-wrapper .highslide-header a {
+		font-weight: bold;
+		color: gray;
+		text-transform: uppercase;
+		text-decoration: none;
+	}
+	.highslide-wrapper .highslide-header a:hover {
+		color: black;
+	}
+	.highslide-wrapper .highslide-header .highslide-move a {
+		cursor: move;
+	}
+	.highslide-wrapper .highslide-footer {
+		height: 11px;
+	}
+	.highslide-wrapper .highslide-footer .highslide-resize {
+		float: right;
+		height: 11px;
+		width: 11px;
+		background: url(/highslidegraphics/resize.gif);
+		position: relative;
+		top: 0.5em;
+		left: 0.5em;
+	}
+
+	.highslide-wrapper .highslide-body {
+	}
+</style>
+<script language="JavaScript" type="text/javascript">
+	<!--ProductIds-->
+	<!--ProductCosting-->
+	<!--ExtraJavaScript-->
+
+	function CheckOptions()
+	{
+		return HasSelected(document.Form1.elements['template'], 'Product');
+	}
+
+	function openWin(strURL)
+	{
+		var winCurrent
+		winCurrent = window.open(strURL, "", "width=600,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+		winCurrent.focus(); 
+	}
+
+
+	function HasSelected(ctrlRadio, strCaption)
+	{
+		var blnOK = false;
+
+		if (ctrlRadio.length != null)
+		{
+			for(var i=0; i < ctrlRadio.length; i++)
+		{
+		if (ctrlRadio[i].checked)
+		{
+			if(document.getElementById("totalqty" + ctrlRadio[i].value) != null)
+			{
+				if(!String(document.getElementById("totalqty" + ctrlRadio[i].value).value).match(/^\d+$/))
+				{
+					alert("Please enter a numeric quantity");
+					document.getElementById("totalqty" + ctrlRadio[i].value).focus();
+					return false;
+				}
+			}
+			blnOK = true;
+			if (!CheckExtraFields(ctrlRadio[i].value))return false;
+
+			if(document.getElementById("qty" + ctrlRadio[i].value) != null)
+			{
+				if(!String(document.getElementById("qty" + ctrlRadio[i].value).value).match(/^\d+$/))
+				{
+					alert("Please enter a numeric quantity");
+					document.getElementById("qty" + ctrlRadio[i].value).focus();
+					return false;
+				}
+			}
+			blnOK = true;
+			if (!CheckExtraFields(ctrlRadio[i].value))return false;
+
+			}
+		}
+		if (blnOK)return true;
+	}
+	else if (ctrlRadio.checked)
+	{
+		return CheckExtraFields(ctrlRadio.value);
+	}
+		alert('Please select a ' + strCaption);
+		return false;
+	}
+
+	function CheckExtraFields(ProductId)
+	{
+		<!--CheckProductFields-->
+		return true;
+	}
+
+	function openHelp(strURL)
+	{
+		var winCurrent
+		winCurrent = window.open(strURL, "", "width=450,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+		winCurrent.focus(); 
+	}
+
+	function FillBox(strCurBox, intArrayIndex)
+	{
+		var aryArraysCur = eval('aryArrays' + intArrayIndex);
+		var aryBoxesCur = eval('aryBoxes' + intArrayIndex);
+		var aryBoxValuesCur = eval('aryBoxValues' + intArrayIndex);
+
+		for (var i=0; i<aryArraysCur.length; i++)
+		{
+			if (aryArraysCur[i] == strCurBox)
+			{
+				aryBoxValuesCur[i] = document.Form1.elements[aryBoxesCur[i]].value;
+				for (var j=i+1; j<aryArraysCur.length; j++)
+				{
+					SetupBox(document.Form1.elements[aryBoxesCur[j]], eval(aryArraysCur[j]), j, intArrayIndex);
+				}
+
+				break;
+			}
+		}
+
+		for (var i=0; i<aryBoxesCur.length; i++)
+		{
+			aryBoxValuesCur[i] = document.Form1.elements[aryBoxesCur[i]].value;
+		}
+
+		GetCost(aryProductIds[intArrayIndex-1], intArrayIndex);
+	}
+
+	function GetCost(strProduct, intArrayIndex)
+	{
+		if(document.getElementById('qty' + strProduct) != null)
+		{
+			var aryCosting = eval('aryProductCost'+strProduct);
+			var aryUrgentCosting = eval('aryProductUrgentCost'+strProduct);
+			var cboCurrent = document.getElementById('qty' + strProduct);
+			var intIndex = -1;
+			var i=0;
+			var strCost2 = 0;
+			var strCost=0;
+			var strUrgentCost=0;
+			var checkUrgent = document.getElementById('urgent' + strProduct);
+
+			if(cboCurrent[1].value != '0')
+			{
+				for (i=0; i<aryCosting.length; i=i+2)
+				{
+					if (aryCosting[i]==cboCurrent[cboCurrent.selectedIndex].value)
+					{
+						intIndex = i;
+					}
+				}
+			} else {	
+				for (var i=0; i < document.Form1.elements.length; i++)
+				{
+					if (document.Form1.elements[i].type == "checkbox")
+					{
+						if (document.Form1.elements[i].value == strProduct)
+						{
+							document.Form1.elements[i].style.display = "none";
+						}
+					}
+				}
+			}
+
+			if (intIndex >= 0)
+			{
+				strCost = aryCosting[intIndex+1];
+				if (checkUrgent != null) {
+					if (document.Form1.elements['urgent' + strProduct].value != '')
+					{
+						if (document.Form1.elements['urgent' + strProduct].checked)strUrgentCost = aryUrgentCosting[intIndex+1];
+					}
+				}
+				if (strCost == '')strCost = 0;
+				if (strUrgentCost == '')strUrgentCost = 0;
+			}
+
+			if (intArrayIndex > 0)
+			{
+				var aryCur = eval('aryBoxValues' + intArrayIndex)
+				var aryCur2;
+				for (i=0; i<aryCur.length; i++)
+				{
+					if (aryCur[i] != '')
+					{
+						aryCur2 = eval(eval('aryArrays' + intArrayIndex)[i]);
+						for (var j=0; j<aryCur2.length; j++)
+						{
+							if (aryCur2[j][0] == aryCur[i])
+							{
+								switch(aryCur2[j][6])
+								{
+									case 'total':
+									strCost2 = strCost2 + (parseFloat(aryCur2[j][5]) * cboCurrent[cboCurrent.selectedIndex].text);
+									break;
+									case 'units':
+									strCost2 = strCost2 + (parseFloat(aryCur2[j][5]) * cboCurrent[cboCurrent.selectedIndex].value);
+									break;
+									default:
+									strCost2 = strCost2 + parseFloat(aryCur2[j][5]);
+								}
+								break;
+							}
+						}
+					}
+				}
+
+			}
+
+			strCost = strCost + strCost2 + strUrgentCost;
+			if (strCost == 0){strCost=''}else{strCost = CurrencyFormatted(strCost)};
+			if (strCost != ''){
+				strCost = '<br>{CurrencySymbol}' + strCost;
+				eval(document.getElementById("templatecost" + strProduct)).innerHTML=strCost;
+			}
+
+			if (cboCurrent[cboCurrent.selectedIndex].value == "")
+			{
+				document.Form1.elements['template' + strProduct].checked=false;
+			} else {
+				document.Form1.elements['template' + strProduct].checked=true;
+			}
+		}
+	}
+
+	function CheckMe(strProduct)
+	{
+		if (document.Form1.elements['totalqty' + strProduct].value > 0) 	{
+			document.Form1.elements['template' + strProduct].checked=true;
+		}
+		else {
+			document.Form1.elements['template' + strProduct].checked=false;
+		}
+	}
+
+	function CurrencyFormatted(strCost)
+	{
+		var minus = '';
+		var i = parseFloat(strCost);
+
+		if(isNaN(i))i=0.00;
+		if(i < 0)minus = '-';
+		i = Math.abs(i);
+		i = parseInt((i + .005) * 100);
+		i = (i / 100);
+		s = new String(i);
+		if(s.indexOf('.') < 0)s += '.00';
+		if(s.indexOf('.') == (s.length - 2))s += '0';
+		s = minus + s;
+		return s;
+	}
+	function SetupBoxes()
+	{
+		var aryArraysCur;
+		var aryBoxesCur;
+
+		for (var i=1; i<=aryProductIds.length; i++)
+		{
+			aryArraysCur = eval('aryArrays' + i);
+			aryBoxesCur = eval('aryBoxes' + i);
+			for (var j=0; j<aryBoxesCur.length; j++)
+			{
+				SetupBox(document.getElementById(aryBoxesCur[j]), eval(aryArraysCur[j]), j, i);
+			}
+		}
+
+		for (var i=0; i<aryAllProductIds.length; i++)
+		{
+			GetCost(aryAllProductIds[i], 0);
+		}
+	}
+
+	function SetupBox(cboCur, aryOp, intIndex, intArrayIndex)
+	{
+		var aryCur;
+		var aryCur2;
+		var aryCur3;
+		var aryCurBoxValues;
+		var cboCur;
+		var blnAddIt=true;
+
+		aryCurBoxValues = eval('aryBoxValues' + intArrayIndex);
+
+		while (cboCur.length > 0)cboCur.remove(0);
+
+		cboCur[cboCur.length] = new Option('', '');
+
+		for(var i=0; i<aryOp.length; i++)
+		{
+			aryCur = aryOp[i];
+
+			for (var j=0;  j < aryCur.length; j=j+7)
+			{
+				if (aryCur[j+2] == true)
+				{
+					blnAddIt = true;
+				}
+				else
+				{
+					aryCur2 = eval('aryLink' + aryCur[j]);
+					for (var k=0; k<aryCur2.length; k++)
+					{
+						aryCur3 = aryCur2[k];
+						blnAddIt=true;
+						for (var l=0; l<aryCur3.length; l++)
+						{
+							blnAddIt = InArray(aryCur3[l], aryCurBoxValues);
+							if (blnAddIt == false)break;
+						}
+
+						if (blnAddIt)break;
+					}
+				}
+				if (blnAddIt)
+				{
+					cboCur[cboCur.length] = new Option(aryCur[j+1], aryCur[j]);
+					if (aryCurBoxValues[intIndex] == aryCur[j])cboCur.selectedIndex = cboCur.length-1;
+				}
+			}
+		}
+		return true;
+	}
+
+	function InArray(strItem, aryCurBoxValues)
+	{
+		for (var i=0; i<aryCurBoxValues.length; i++)
+		{
+			if (strItem == aryCurBoxValues[i])return true;
+		}
+		return false;
+	}
+
+	function showhelp(strHeader, strHelp,evt, blnShow) {
+
+		var tempX = 0;
+		var tempY = 0;
+		var strVis="hidden";
+		var IE = document.all?true:false;
+		var hp = document.getElementById("help_popup").style;
+
+		document.getElementById("help_header").innerHTML = "";
+		document.getElementById("help_body").innerHTML =  "";
+		hp.visibility = "hidden";
+
+		if (blnShow)
+		{
+			strVis = "visible";
+			if (IE)
+			{
+				tempX = event.clientX + document.body.scrollLeft;
+				tempY = event.clientY + document.body.scrollTop;
+			}
+			else
+			{
+				tempX = evt.pageX;
+				tempY = evt.pageY;
+			}
+
+			hp.top = tempY-30;
+			hp.left = tempX+20;
+			document.getElementById("help_header").innerHTML = strHeader;
+			document.getElementById("help_body").innerHTML = strHelp;
+		}  
+
+		hp.visibility = strVis;
+	}
+
+	function isWhitespace (strCurrent)
+	{   
+		var i;
+		var whitespace = " \t\n\r";
+
+		if (isEmpty(strCurrent)) return true;
+
+		for (i = 0; i < strCurrent.length; i++)
+		{   
+			var c = strCurrent.charAt(i);
+
+			if (whitespace.indexOf(c) == -1) return false;
+		}
+
+		return true;
+	}
+
+	function isEmpty(strCurrent)
+	{  
+		return ((strCurrent == null) || (strCurrent.length == 0))
+	}
+
+	function CheckEntry(ctrlCur, strCaption, blnRequired, strLength, strType, strErrorMessage)
+	{
+		var strTempMsg = strErrorMessage;
+
+		if ((isWhitespace(document.Form1.elements[ctrlCur].value)) && blnRequired)
+		{
+			if (strTempMsg != ''){
+				alert(strTempMsg);
+			}
+			else{
+				alert('You must enter a value for ' + strCaption);
+			}
+			document.Form1.elements[ctrlCur].focus();
+			return false;
+		}
+
+		if (strLength != '')
+		{
+			var intLen = parseInt(strLength);
+
+			if (intLen != 0)
+			{
+				if ((document.Form1.elements[ctrlCur].value.length != intLen) && (strType == 'exactly'))
+				{
+					if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+					if (strErrorMessage == ''){strTempMsg='Please enter ' + strLength + ' characters for ' + strCaption}
+					alert(strTempMsg);
+					return false;
+				}
+
+				if ((document.Form1.elements[ctrlCur].value.length < intLen) && (strType == 'at least'))
+				{
+					if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+					if (strErrorMessage == ''){strTempMsg='Please enter at least ' + strLength + ' characters for ' + strCaption}
+					alert(strTempMsg);
+					return false;
+				}
+
+				if ((document.Form1.elements[ctrlCur].value.length > intLen) && (strType == 'at most'))
+				{
+					if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length==0))return true;
+					if (strErrorMessage == ''){strTempMsg='Please enter at most ' + strLength + ' characters for ' + strCaption + '\n(You have entered ' + document.Form1.elements[ctrlCur].value.length + ' characters)'}
+					alert(strTempMsg);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+
+	function download(objThis, strTId)
+	{
+		window.location = 'DownloadProduct.asp?downloadpdf=1&tid=' + strTId;
+	}
+
+	function functionOnLoad(){
+		return SetupBoxes();
+	}
+</script>
+
+
+<div style="visibility: hidden; position: absolute; filter:alpha(opacity=85); -moz-opacity:0.85; opacity: 0.85; z-index: 1; top: 5px; left: 5px; width:200px;" id="help_popup"> 
+	<iframe id="frTest" style="z-index:-1;width:200px;height:200;position:absolute;top:0;left:0;display:inline;" frameborder="0" scrolling="no" marginwidth="0" src="" marginheight="0"></iframe>
+	<table class="bordertable" width="200">
+		<tr><td class="bordertableheader" id="help_header"></td></tr>
+		<tr><td id="help_body"></td></tr>
+	</table>
+</div>
+<!--DynamicCostCentres-->
+<form name="frmCCs" method="Post">
+	<table width="100%" class="bordertable">
+		<tr>
+			<td class="bordertableheader" colspan="3">{CostCentreCaption}</td>
+		</tr>
+		<tr>
+			<td width="120" class="TextBoxText" valign="bottom">Please select from the list</td>
+			<td class="TextBoxText" valign="bottom">
+				{CostCentres}
+			</td>
+		</tr>
+	</table>
+	<br/>
+</form>
+<!--/DynamicCostCentres-->
+
+<!--TABTABLE-->
+<!--TabTableStart-->
+
+<div id="frmSearchForm">
+	<form name="frmSearch" method="Post">
+		<p><b>Search:&nbsp;</b><input type="text" name="txtSearch" value="{search}">&nbsp;<input type="submit" name="btnSearch" id="submit" value="Go">&nbsp;</p>
+		<input type="hidden" name="ccid" value="{ccid}"></p>
+		<input type="text" name="nothing" style="width:0px;height:0px;border:none">
+	</form>
+</div>
+
+<form name="Form1" method="Post" onSubmit="return CheckOptions()">
+	<table border="0" cellspacing="0" cellpadding="0" class="wrapper" width="100%">
+		<tr>
+			<td valign="top" align="left" width="100%">
+				{WHERE}
+				<!--HelpTextAdd--><br><blockquote>{HelpTextAdd}</blockquote><!--/HelpTextAdd-->
+				<!--Style-->
+				<br/>
+				<table width="100%" class="bordertable" border="0" cellspacing="1" cellpadding="2"> 
+					<tr>
+						<td class="bordertableheader" colspan="4">{Category}</td>
+					</tr>   
+					<!--TemplateItem-->
+					<script type="text/javascript" language="javascript">
+						hs.registerOverlay({
+						thumbnailId: 'thumbimg{id}',
+						overlayId: 'closebutton{id}',
+						position: 'top right',
+						fade: 2
+						});
+					</script>
+					<tr>
+						<td width="85" valign="top" rowspan="{rowspan}" class={rowclass}>
+							<a href={Thumbnail} class="highslide" onclick='return hs.expand(this, {outlineType: "rounded-white", wrapperClassName: "highslide-white"})'><img id=thumbimg{id} src={Thumbnail} alt="{ThumbnailAlt}" width="85" title="Click to enlarge"></a>
+							<div id="closebutton{id}" class="highslide-overlay closebutton"	onclick="return hs.close(this)" title="Close"></div>
+							<span id="templatecost{id}"></span>
+						</td>
+						<td valign="top" nowrap colspan="2" class={rowclass} width="100%"><b>{TemplateName}</b><!--ExTRAS--></td>
+						<td valign="top" align="right" class={rowclass}><input type="button" onClick="javascript:window.location='{location}'" value=" Select >> "></td>
+					</tr>
+					<!--/TemplateItem-->
+				</table>
+				<!--/Style-->
+				<!--Products-->
+				<br/>
+				<table width="100%" class="bordertable" border="0" cellspacing="1" cellpadding="2">                    
+					<!--ADDCART-->
+					<tr>
+						<td colspan="8" align="right">
+							<input type="submit" name="btnCartContinue" value="Add to Cart "><br><br>
+							<input type="submit" name="btnCart" value=" Add to Cart and Checkout >>">
+						</td>
+					</tr>
+					<!--/ADDCART-->
+					<tr>
+						<td class="bordertableheader" colspan="2">&nbsp;</td>
+						<td class="bordertableheader">Product</td>
+						<td class="bordertableheader">Quantity</td>
+						<!--stock--><td class="bordertableheader">Stock</td><!--/stock-->
+						<!--ExtraHeader-->
+						<!--Urgent--><td class="bordertableheader">Urgent?</td><!--/Urgent-->
+						<!--Favorite--><td class="bordertableheader"></td><!--/Favorite-->
+					</tr>
+					<!--ProductStyle-->
+					<tr>
+						<td valign="top" class="{rowclass}" rowspan="{rowspan}">
+							<div class="productCheckboxBorder">
+								<!--ProductCheckBox--><input type="checkbox" name="template" id="template{templateid}" value="{templateid}"><!--/ProductCheckBox-->
+								<!--Download--> <input type="button" value="Download" onclick="download(this, '{templateid}')"><!--/Download-->
+							</div>
+						</td>
+						<td class="{rowclass}" valign="top" rowspan="{rowspan}" align="center">
+							<script language="javascript" type="text/javascript">
+								hs.registerOverlay({thumbnailId: 'thumbimg{templateid}', overlayId: 'closebutton{templateid}', position: 'top right', fade: 2});
+							</script>
+							<a href={thumb} class="highslide" onclick='return hs.expand(this)'><img id="thumbimg{templateid}" src={thumb}></a>
+							<div id='closebutton{templateid}' class='highslide-overlay closebutton' onclick='return hs.close(this)' title='Close'></div>
+							<span id="templatecost{templateid}" class="clscost" {hidecost}></span>
+						</td>
+						<td class="{rowclass}" width="50%" valign="top">
+							<a href="JavaScript:openWin('ShowProduct.asp?Id={templateid}&si=' + document.getElementById('{prodid}{templateid}').value);">{templatename}</a>
+							<input type="hidden" name="ProductName{templateid}" value="{templatename}">
+						</td>
+						<td valign="top" class="{rowclass}">
+							{quantity}
+							<!--AttachFile-->
+							{AttachCaption}
+							<a href='UploadAttachment.asp?productcat=yes&tid={templateid}&qty={qtyfromupload}' id="hsfileattachment" onclick="return hs.htmlExpand(this, { outlineType: 'rounded-white', wrapperClassName: 'highslide-wrapper', objectType: 'iframe', preserveContent: false, width:400} )">Click here to upload file</a>
+							<span id="fileuploadspan{templateid}"></span>
+							<input type="hidden" name="fileupload{templateid}" id="fileupload{templateid}"><input type="hidden" name="fileuploadname{templateid}" id="fileuploadname{templateid}">
+							<!--/AttachFile-->
+						</td>
+						<!--stock-->
+						<td class="{rowclass}"><span class="stock">{stockqty}</span></td>
+						<!--/stock-->
+						{extras}
+						<!--Urgent--><td valign="top" align="center" class="{rowclass}">{urgent}</td><!--/Urgent-->
+						<!--Favourite--><td valign="top" class="{rowclass}" rowspan="{rowspan}">{fav}</td><!--/Favourite-->
+					</tr>
+					<!--Description-->
+					<tr>
+						<td valign="top" class="{rowclass}" colspan="{colspan}">
+							{desc}
+						</td>
+					</tr>
+					<!--/Description-->
+					<!--/ProductStyle-->
+				</td>
+		</tr>
+		<tr>
+			<td colspan="8" align="right">
+				<input type="submit" name="btnCartContinue" value="Add to Cart "><br><br>
+				<input type="submit" name="btnCart" value=" Add to Cart and Checkout >>">
+			</td>
+		</tr>
+	</table>
+	<!--/Products-->
+	<br/>
+
+	<!--CATEGORIES-->
+	<table border="0" cellpadding="0" cellspacing="0" class="bordertable"  width="100%">
+		<tr>
+			<td class="bordertableheader" colspan=3>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+					<tr>
+						<td class="bordertableheader">Please select a category below</td>
+						<td class="bordertableheader" align="right">{Favorites}<a href="ProductCats.asp?cid=all">View All</a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--menuitem-->
+		<tr>
+			<td width="85">{Thumbnail1}</td>
+			<td nowrap width="100%"><font color="#999999">{Caption1}<div class="stationeryhelptext1">{HelpText1}</div></font>
+			</td>
+		</tr>
+		<!--CategoryItem2-->
+		<tr>
+			<td width="85">{Thumbnail2}</td>
+			<td nowrap width="100%"><font color="#999999">{Caption2}<div class="stationeryhelptext2">{HelpText2}</div></font>
+			</td>
+		</tr>
+		<!--/CategoryItem2-->
+		<!--/menuitem-->
+	</table>
+	<br/>
+	<!--/CATEGORIES-->
+</td>
+</tr>
+</table>
+</form>
+<br/>
+<!--TabTableEnd-->
+<!--/TABTABLE-->

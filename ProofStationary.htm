@@ -1,0 +1,63 @@
+<script>
+var blnOrder = false
+
+function checkOrder() {
+	if (blnOrder) {
+		return confirm("Are you sure you want to order your product now?");
+	}
+}
+
+function openWin(strURL) {
+	var winCurrent
+	winCurrent = window.open(strURL, "", "width=600,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+	winCurrent.focus();
+}
+
+function initialiseScreen() {
+	getListInfo('{listid}', '');
+
+	//<!--SEEDS-->
+	getListInfo('{seedlistid}', 1);
+	//<!--/SEEDS-->
+
+	CheckApproverEmail();
+
+	if (document.getElementById("spnInsertsList")) {
+		getInsertsInfo();
+	}
+}
+
+function functionOnLoad() {
+	initialiseScreen();
+}
+</script>
+<!--TabTableStart-->
+	<div id="order-{torder}" class="order-proof">
+		<div id="order-proof-thumbnail">
+			<form action="Step5Edit.asp" method="post">
+				<input type="hidden" name="torder3" id="torder3" value="{torder}" />
+				<!--HiddenVariables-->
+				<!--HiddenEVariables-->
+				<!--fthumb-->
+					<div id="order-proof-thumbnail-front">
+						{FrontFile}
+					</div>
+				<!--/fthumb-->
+				<!--bthumb-->
+					<div id="order-proof-thumbnail-back">
+						{BackFile}
+					</div>
+				<!--/bthumb-->
+				<!--EditArtWork-->
+					<!--EditArtworkDetailsButton-->
+						<input type="submit" value="Edit Artwork Details" />
+					<!--/EditArtworkDetailsButton-->
+				<!--/EditArtWork-->
+			</form>
+		</div>
+		<div id="order-proof-details">
+			!user/proofRHS.htm!
+		</div>
+	</div>
+<!--TabTableEnd-->
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/proofstationary.js"></script>

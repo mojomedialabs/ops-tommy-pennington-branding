@@ -1,0 +1,581 @@
+<script>
+function SetOptions() {
+	var strDisplay = "";
+
+	if (document.Form1.selectFront == null) return true;
+	if (document.Form1.selectFront.value != '') {
+		UpdateBoxCount(document.Form1.selectFront);
+
+		if (eval('Template' + document.Form1.selectFront.value + 'CopyAddress') == 2) {
+			strDisplay = "none";
+		}
+	} else {
+		strDisplay = "none"
+	}
+
+	document.getElementById('trcopy').style.display = strDisplay;
+	if (document.getElementById('EIFGroupNameList').value != '') EIFGroupClicked('');
+	return true;
+
+}
+
+function isEmpty(strCurrent) {
+	return ((strCurrent == null) || (strCurrent.length == 0))
+}
+
+function ValidData() {
+	if (document.Form1.selectFront.selectedIndex <= 0) {
+		alert('Please select a Front Style');
+		return false;
+	}
+
+	if (eval('Template' + document.Form1.selectFront.value + 'BackRequired') == 1) {
+		if (document.Form1.selectBack.value == '') {
+			alert('Please select a Back Style');
+			return false;
+		}
+	}
+
+	if (document.Form1.TotalQuantity) {
+		if (!String(document.Form1.TotalQuantity.value).match(/^\d+$/)) {
+			alert("Please enter a numeric quantity");
+			document.Form1.TotalQuantity.focus();
+			return false;
+		}
+	}
+
+	<!--CopyAddressLogic -->
+	<!--PONumberLogic -->
+	<!--ExtraInfoLogic -->
+	<!--DeliveryAddressLogic -->
+
+	EnableFields();
+
+	return true;
+}
+
+function EnableFields() {
+	var objElements;
+	var i;
+
+	objElements = document.getElementsByTagName("input");
+
+	for (i = 0; i < objElements.length; i++) {
+		if (objElements[i].disabled) {
+			objElements[i].value = "";
+		}
+		objElements[i].disabled = false;
+	}
+
+	objElements = document.getElementsByTagName("select");
+	for (i = 0; i < objElements.length; i++) {
+		if (objElements[i].disabled) {
+			objElements[i].selectedIndex = "0";
+		}
+		objElements[i].disabled = false;
+	}
+}
+
+function oldUpdateBoxCount(cboxCur) {
+	if (cboxCur.selectedIndex == 0) return true;
+
+	var intCount = eval('TemplateQty' + cboxCur[cboxCur.selectedIndex].value);
+
+	var intUnitQty = eval('TemplateUnitQty' + cboxCur[cboxCur.selectedIndex].value);
+
+	var intTmp = document.Form1.Quantity.length;
+
+	//if (intTmp == intCount)return true;
+	if (intTmp < intCount) {
+		for (var i = intTmp + 1; i <= intCount; i++) {
+			document.Form1.Quantity.options[document.Form1.Quantity.length] = new Option(i * intUnitQty, i);
+		}
+	} else {
+		for (var i = intTmp; i >= intCount; i--) {
+			document.Form1.Quantity.remove(i);
+		}
+	}
+}
+
+function UpdateBoxCount(cboxCur) {
+	//<!--QuantityJavascript-->
+	var intTmp = document.Form1.Quantity.selectedIndex;
+	var intCount = 0;
+	var intUnitQty = 0;
+	var aryQtys = new Array();
+	var aryQtysPrice1 = new Array();
+	var aryQtysPrice2 = new Array();
+	var iPrice = 0;
+	var sCurrencyCode = '';
+	//<!--QuantityPrice-->
+	//<!--/QuantityPrice-->
+	if (intTmp == -1) {
+		intTmp = 0;
+	}
+
+	while (document.Form1.Quantity.length > 0) {
+		document.Form1.Quantity.remove(0)
+	}
+
+	if (cboxCur.selectedIndex != 0) {
+		intCount = eval('TemplateQty' + cboxCur[cboxCur.selectedIndex].value);
+		intUnitQty = eval('TemplateUnitQty' + cboxCur[cboxCur.selectedIndex].value);
+		aryQtys = eval('TemplateQtys' + cboxCur[cboxCur.selectedIndex].value);
+	}
+
+	for (var i = 0; i < aryQtys.length; i++) {
+		iPrice = 0;
+		for (var iCntr = 0; iCntr < aryQtysPrice1.length; iCntr++) {
+			if (aryQtys[i] * intUnitQty == aryQtysPrice1[iCntr]) {
+				iPrice = aryQtysPrice2[iCntr];
+			}
+		}
+		if (sCurrencyCode == '&euro;') {
+			sCurrencyCode = String.fromCharCode(8364)
+		}
+		if (iPrice != 0) {
+			document.Form1.Quantity.options[document.Form1.Quantity.length] = new Option(aryQtys[i] * intUnitQty + ' - (' + sCurrencyCode + iPrice + ')', aryQtys[i]);
+		} else {
+			document.Form1.Quantity.options[document.Form1.Quantity.length] = new Option(aryQtys[i] * intUnitQty, aryQtys[i]);
+		}
+	}
+
+	if (intTmp >= document.Form1.Quantity.length) {
+		intTmp = 0;
+	}
+
+	document.Form1.Quantity.selectedIndex = intTmp;
+
+	if (document.Form1.Quantity.length == 0) {
+		document.Form1.btnSubmit.style.display = "none";
+	} else {
+		document.Form1.btnSubmit.style.display = "inline";
+	}
+	//<!--/QuantityJavascript-->
+}
+
+function CheckEntry(ctrlCur, strCaption, blnRequired, strLength, strType) {
+	if ((isWhitespace(document.Form1.elements[ctrlCur].value)) && blnRequired) {
+		alert('You must enter a value for ' + strCaption);
+		document.Form1.elements[ctrlCur].focus();
+		return false;
+	}
+
+	if (strLength != '') {
+
+		var intLen = parseInt(strLength);
+
+		if (intLen != 0) {
+			if ((document.Form1.elements[ctrlCur].value.length != intLen) && (strType == 'exactly')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length < intLen) && (strType == 'at least')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter at least ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+
+			if ((document.Form1.elements[ctrlCur].value.length > intLen) && (strType == 'at most')) {
+				if ((blnRequired == false) && (document.Form1.elements[ctrlCur].value.length == 0)) return true;
+				alert('Please enter at most ' + strLength + ' characters for ' + strCaption);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+function HasSelected(ctrlRadio, strCaption) {
+	if (ctrlRadio.value == null) {
+		for (var i = 0; i < ctrlRadio.length; i++) {
+			if (ctrlRadio(i).checked) {
+				return true;
+				break;
+			}
+		}
+	} else {
+		return true;
+	}
+
+	alert('Please select a ' + strCaption);
+
+	return false;
+}
+
+function ShowThumb(cboCur, blnFront) {
+	var strImage;
+	var aryCur = new Array();
+	var intBackIndex;
+	var intBorder;
+	var blnBackRequired;
+
+	intBorder = 1;
+
+	if (blnFront == true) {
+		if (document.Form1.selectBack != null) {
+			document.Form1.imgBack.src = 'images/spacer.gif';
+			document.Form1.imgBack.border = 0;
+			while (document.Form1.selectBack.options.length > 0) document.Form1.selectBack.remove(0);
+		}
+	}
+
+	strImage = '';
+	if (cboCur.value != '') strImage = eval('Image' + cboCur.value);
+	if (strImage == '') {
+		strImage = "images/spacer.gif";
+		intBorder = 0;
+	}
+
+	if (blnFront == true) {
+		var intNewIndex;
+
+		document.Form1.imgFront.src = strImage;
+		document.Form1.imgFront.border = intBorder;
+
+		if ((document.Form1.selectBack != null) && (cboCur.value != '')) {
+			aryCur = eval('Template' + cboCur.value);
+
+			blnBackRequired = eval('Template' + cboCur.value + 'BackRequired');
+
+			intBackIndex = document.Form1.selectBack.selectedIndex;
+			if (intBackIndex != -1) intBackIndex = document.Form1.selectBack.options[intBackIndex].value;
+
+			while (document.Form1.selectBack.options.length > 0) document.Form1.selectBack.remove(0);
+
+			if (blnBackRequired == 0) document.Form1.selectBack.options[0] = new Option('', '');
+
+			intNewIndex = 0;
+			for (var i = 0; i < aryCur.length; i++) {
+				document.Form1.selectBack.options[document.Form1.selectBack.length] = new Option(eval('TemplateBack' + aryCur[i]), aryCur[i]);
+				if (intBackIndex != -1) {
+					if (aryCur[i] == intBackIndex) {
+						intNewIndex = i + 1;
+					}
+				}
+			}
+			document.Form1.selectBack.selectedIndex = intNewIndex;
+			ShowThumb(document.Form1.selectBack, false);
+		}
+	} else {
+		document.Form1.imgBack.src = strImage;
+		document.Form1.imgBack.border = intBorder;
+	}
+
+	if (blnFront) {
+		switch (cboCur.value) {
+			<!--DataEntryModeLogic -->
+		}
+	}
+
+	SetOptions();
+}
+
+function ShowDECheck(blnShow, blnOn) {
+	document.Form1.elements['HT'].checked = blnOn;
+
+	if (blnShow) {
+		showch.style.display = ""
+	} else {
+		showch.style.display = "none"
+	}
+}
+
+function ShowBacks(strIds) {
+	var strValue;
+
+	for (var i = 0; i < document.Form1.elements['rdoBack'].length; i++) {
+		strValue = '|' + document.Form1.elements['rdoBack'][i].value + '|';
+		if (strValue != "||") {
+			if (strIds.indexOf(strValue) == -1) {
+				document.Form1.elements['rdoBack'][i].disabled = true;
+				document.Form1.elements['rdoBack'][i].checked = false;
+			} else {
+				document.Form1.elements['rdoBack'][i].disabled = false;
+			}
+		}
+	}
+}
+
+function openHelp(strURL) {
+	var winCurrent
+	winCurrent = window.open(strURL, "", "width=450,height=400,toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+	winCurrent.focus();
+}
+
+function popup(strUrl){
+	var winEd
+	winEd = window.open(strUrl, "", "width=620,height=320,toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+	winEd.focus();
+}
+
+function checkOrderDetails() {
+	if ($("#orderdetails").find(".order-detail").length === 0) {
+		$("#orderdetails").hide();
+	}
+}
+
+function EIFGroupClicked(strVal) {
+	var aryGroups;
+	var iCntr = 0;
+	var children;
+	var i;
+	var strGNList = document.getElementById('EIFGroupNameList').value;
+
+	if (strVal == '') {
+		for (i = 0; i < document.Form1.eifgroup.length; i++) {
+			if (document.Form1.eifgroup[i].checked) {
+				strVal = document.Form1.eifgroup[i].value;
+			}
+		}
+		if (strVal == '') {
+			document.Form1.eifgroup[0].checked = true;
+			strVal = document.Form1.eifgroup[0].value;
+		}
+	}
+
+	aryGroups = strGNList.split("|");
+	for (iCntr = 0; iCntr < aryGroups.length; iCntr++) {
+		children = document.getElementById('div' + aryGroups[iCntr]).getElementsByTagName('*');
+		for (i = 0; i < children.length; i++) {
+			if (children[i].type == "text" || children[i].type == "select-one") {
+				children[i].disabled = true;
+			}
+		}
+
+		children = document.getElementsByName("GroupItem" + aryGroups[iCntr]);
+
+		for (i = 0; i < children.length; i++) {
+			setOpacity(50, children[i]);
+		}
+	}
+
+	children = document.getElementById('div' + strVal).getElementsByTagName('*');
+	for (i = 0; i < children.length; i++) {
+		children[i].disabled = false;
+		setOpacity(100, children[i]);
+	}
+}
+
+function setOpacity(opacity, objObject) {
+	// IE/Win
+	objObject.style.filter = "alpha(opacity:" + opacity + ")";
+	objObject.style.zoom = 1;
+
+	// Safari<1.2, Konqueror
+	objObject.style.KHTMLOpacity = opacity / 100;
+
+	// Older Mozilla and Firefox
+	objObject.style.MozOpacity = opacity / 100;
+
+	// Safari 1.2, newer Firefox and Mozilla, CSS3
+	objObject.style.opacity = opacity / 100;
+}
+</script>
+<!--TabTableStart-->
+	<!--DynamicCostCentres-->
+		<form name="frmCCs" method="Post">
+			<TABLE width="100%" CLASS=bordertable>
+				<tr>
+					<td class=bordertableheader colspan=3>
+						{CostCentreCaption}
+					</td>
+				</tr>
+				<tr>
+					<td width="120" class="TextBoxText" valign="bottom">
+						Please select from the list
+					</td>
+					<td class="TextBoxText" valign="bottom">
+						{CostCentres}
+					</td>
+				</tr>
+			</table>
+			<br>
+		</form>
+	<!--/DynamicCostCentres-->
+	<form name="Form1" method="Post" id="Form1" onSubmit="return ValidData();">
+		<!--Style-->
+			<div id="product-style">
+				<!--FrontBackStyle-->
+					<div id="select-product-style">
+						<div id="front-back">
+							{frontback}
+						</div>
+						<select onchange="{styleonchange}" name="select{frontback}" id="select{frontback}">
+							{options}
+						</select>
+					</div>
+					<div id="product-style-preview">
+						<img src="{imagesrc}" alt="{imagealt}" id="img{frontback}" />
+					</div>
+				<!--/FrontBackStyle-->
+				<div id="trcopy" style="display: {showcopy};">
+					<!--DefaultAddresses-->
+						<div>
+							Select "{stattype}" address
+						</div>
+						<div>
+							{DefaultAddresses}
+						</div>
+					<!--/DefaultAddresses-->
+				</div>
+				<div id="product-style-actions">
+					<!--Quantity-->
+						<div id="product-style-quantity" class="product-style-detail">
+							<label for="Quantity">Qty: {quantity}</label>
+						</div>
+					<!--/Quantity-->
+					<!--CostCentres-->
+						<div id="product-style-cost-centres" class="product-style-detail">
+							<label for="{CostCentreCaption}">{CostCentreCaption}: {CostCentres}</label>
+						</div>
+					<!--/CostCentres-->
+					<!--PONumber-->
+						<div id="product-style-po-number" class="product-style-detail">
+							<label for="PONumber">PO Number</label>
+							<input type="text" value="{PONumber}" name="PONumber" />
+						</div>
+					<!--/PONumber-->
+					<!--ExtraInfos-->
+						<div id="product-style-extra-info" class="product-style-detail">
+							<label for="{ExtraInfoCaption}">{ExtraInfoCaption}</label>
+							{ExtraInfoField}{cclink}
+						</div>
+		            <!--/ExtraInfos-->
+					<!--ExtraInfoGroup-->
+						<div id="div{GroupName}" class="product-style-detail">
+							<div>
+								<!--ExtraInfoGroupSelect-->
+									<input type="radio" name="eifgroup" value="{GroupName}" onClick="EIFGroupClicked(this.value);" {GroupSelected}>
+								<!--/ExtraInfoGroupSelect-->
+								&nbsp;{GroupName}
+							</div>
+							<!--ExtraInfosGroup-->
+								<div name="GroupItem{GroupName}" id="GroupItem{GroupName}">
+									{ExtraInfoCaption}
+								</div>
+								<div name="GroupItem{GroupName}" id="GroupItem{GroupName}">
+									{ExtraInfoField}
+								</div>
+							<!--/ExtraInfosGroup-->
+						</div>
+					<!--/ExtraInfoGroup-->
+					<input type="hidden" id="EIFGroupNameList" value="{EIFGroupNameList}" />
+					<!--DeliveryDetails-->
+						<div>
+							<div>
+								Delivery Details
+							</div>
+							<!--DeliveryAddressCompany-->
+								<div>
+									<div>
+										Company Name
+									</div>
+									<div>
+										<input type=Text class=textboxtext Name=AddressCompany size="30">
+									</div>
+								</div>
+							<!--/DeliveryAddressCompany-->
+							<!--DeliveryAttention-->
+								<div>
+									<div>
+										Attention To
+									</div>
+									<div>
+										<input type=Text class=textboxtext Name=AttentionTo size="30">
+									</div>
+								</div>
+							<!--/DeliveryAttention-->
+							<!--DefaultDeliveryAddress-->
+								<div>
+									<div>
+										{DeliveryAddresses}
+									</div>
+								</div>
+							<!--/DefaultDeliveryAddress-->
+							<!--DeliveryAddressPhoneNumber-->
+								<div>
+									<div>
+										Contact Phone Number
+									</div>
+									<div>
+										<input type=Text class=textboxtext Name=AddressPhoneNumber size="30">
+									</div>
+								</div>
+							<!--/DeliveryAddressPhoneNumber-->
+							<!--AdDef-->
+								<div>
+									<div>
+										Select a Delivery Address
+									</div>
+									<div>
+										{DeliveryAddresses}
+									</div>
+								</div>
+							<!--/AdDef-->
+							<!--AdStat-->
+								<div>
+									<div>
+										{AdOrStat}Use Address on Stationery
+									</div>
+									<div>
+										<input type=checkbox name=DelAddrStat{useaddress}>
+									</div>
+								</div>
+							<!--/AdStat-->
+							<!--AdFree-->
+								<div>
+									<div>
+										{AdOrEnter}Enter Delivery Address
+									</div>
+									<div>
+										<div>
+											<div>
+												Address 1
+												<input type=Text class=textboxtext Name=Address1 size="15">
+											</div>
+											<div>
+												Address 2
+												<input type=Text class=textboxtext Name=Address2 size="15">
+											</div>
+											<div>
+												Address 3
+												<input type=Text class=textboxtext Name=Address3 size="15">
+											</div>
+										</div>
+										<div>
+											<div>
+												Suburb
+												<input type=Text class=textboxtext Name=Suburb size="15">
+											</div>
+											<div>
+												State
+												<input type=Text class=textboxtext Name=State size="5">
+											</div>
+											<div>
+												Postcode
+												<input type=Text class=textboxtext Name=PostCode size="5">
+											</div>
+											<div>
+												Country
+												<input type=Text class=textboxtext Name=Country size="15">
+											</div>
+										</div>
+									</div>
+								</div>
+							<!--/AdFree-->
+						</div>
+					<!--/DeliveryDetails-->
+					<div id="product-style-buttons">
+						<input type="button" value="Back" id="btnBack" />
+						<input type="submit" value="Next" id="btnSubmit" name="btnSubmit" />
+					</div>
+				</div>
+			</div>
+		<!--/Style-->
+	</form>
+<!--TabTableEnd-->
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/step1new.js"></script>

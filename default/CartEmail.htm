@@ -1,0 +1,149 @@
+<html>
+<head>
+<title>{Title}</title>
+<LINK href="{url}include/templatemb.css" rel=stylesheet type=text/css>
+<STYLE type=text/css>
+.totalrow
+{
+    BORDER-RIGHT: #c6d2de 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-BOTTOM: #54678c 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-WEIGHT: bold;
+    BACKGROUND: #ffffff;
+    PADDING-BOTTOM: 1px;
+    BORDER-LEFT: #c6d2de 1px solid;
+    COLOR: #666666;
+    PADDING-TOP: 1px;
+    BORDER-TOP: #c6d2de 3px double
+}
+.subtotalrow
+{
+    BORDER-RIGHT: #c6d2de 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-TOP: #54678c 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-WEIGHT: bold;
+    BACKGROUND: #ffffff;
+    PADDING-BOTTOM: 1px;
+    BORDER-LEFT: #c6d2de 1px solid;
+    COLOR: #666666;
+    PADDING-TOP: 1px;
+    BORDER-BOTTOM: #c6d2de 3px double
+}
+BODY
+{
+    PADDING: 0px 0px 0px 0px;
+    BACKGROUND-COLOR: #FFFFFF;
+
+}
+</STYLE>
+</head>
+
+<BODY leftMargin=0 topMargin=0 marginheight="0" marginwidth="0">
+<CENTER>
+<table border=0 cellpadding="0" cellspacing="0"  width="100%" height="100%" id="maintable">
+  <tr>
+    <td valign="top" colspan="3" height="24"></td>
+  </tr>
+  <tr>
+    <TD WIDTH=50 valign="top"></TD>
+    <td valign="top" align="left" width="600">
+      <h1>{Title}</h1>
+              <!--HelpText--><blockquote>{HelpText}</blockquote><!--/HelpText-->
+<!--TabTableStart-->
+<!--ORDERS-->
+            <table border="0" cellpadding="10" cellspacing="0" class=wrapper width="100%" >
+              <tr>
+                <td colspan=10>
+                  <table border="0" cellpadding="0" cellspacing="0" class=wrapper>
+                    <tr><td valign="top" width="90"><b>Order Number:</b></td><td>{CartId}</td></tr>
+<!--ReturnCard-->
+<!--CreditCardOrder--><tr><td valign="top" width="90"><b>Bank Reference:</b></td><td>{Description}</td></tr><!--/CreditCardOrder-->
+<!--/ReturnCard-->
+
+<!--CostCentreName--><tr><td valign="top"  nowrap="nowrap"><b>{UserSideCaption}:</b></td><td>{CostCentreName}</td><!--/CostCentreName-->
+<!--PONumber--><tr><td valign="top"  nowrap="nowrap"><b>PO Number:</td><td>{PONumber}</b></td><!--/PONumber-->
+<!--NameFirstName--><tr><td valign="top" nowrap="nowrap"><b>Employee Name:</b></td><td>{NameFirstName} {NameSurname}</td><!--/NameFirstName-->
+<!--ContactNumbersPhone--><tr><td valign="top" nowrap="nowrap"><b>Phone:</b></td><td>{ContactNumbersPhone}</td><!--/ContactNumbersPhone-->
+<!--Email--><tr><td valign="top" nowrap="nowrap"><b>Email:</b></td><td>{Email}</td><!--/Email-->
+
+<!--DeliveryDetails-->
+                    <tr><td valign="top" width="90"><b>Deliver To:</b></td><td>{Address}</td></tr>
+<!--/DeliveryDetails-->
+<!--BillingDetails-->
+                    <tr><td valign="top" width="90"><b>Bill To:</b></td><td>{BillingAddress}</td></tr>
+<!--/BillingDetails-->
+                  </table>
+                </td>
+              </tr>
+                    <TR>
+                      <TD align="left" class="tableheader" nowrap>Item #</TD>
+                      <TD align="left" class="tableheader">Date</TD>
+                      <TD align="left" class="tableheader">Qty</TD>
+                      <TD align="left" class="tableheader">Name</TD>
+                      <TD align="left" class="tableheader">Product</TD>
+                      <!--COST--><TD align="right" class="tableheader">Cost</TD><!--/COST-->
+                      <!--Delivery--><TD align="left" class="tableheader">Delivery</TD><!--/Delivery-->
+		      <!--PrinterOnly-->
+				<TD align="left" class="tableheader">Other Info</TD>
+				<TD align="left" class="tableheader">PDF</TD>
+		      <!--/PrinterOnly-->
+                    </tr>
+<!--ROW-->
+                    <TR>
+                      <td id="firstcolumn" class="datatd">{OrderNumber}</TD>
+                      <td class="datatd">{Date}</TD>
+                      <td class="datatd">{Quantity}</TD>
+                      <td class="datatd">{EmpName}</TD>
+                      <td class="datatd">{TemplateName}<!--HiResPDFLink--><!--ExtraOrderFields--></TD>
+                      <!--COST--><td class="datatd" id=lastcolumn align="right">{Cost}</TD><!--/COST-->
+                      <!--Delivery--><td class="datatd">{Address}</TD><!--/Delivery-->
+                      <!--PrinterOnly-->
+				<td class="datatd">{OtherInfo}</TD>
+				<td class="datatd">{PDF}</TD>
+		      <!--/PrinterOnly-->
+                      <td><font color=#ff0000>{Status}</font>{Comments}</TD>
+                      </td>
+                    </tr>
+<!--Postage-->
+					<TR>
+                      <td id="firstcolumn" class="datatd">-</TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd"></TD>
+                      <td class="datatd">Postage</TD>
+                      <!--COST--><td class="datatd" id=lastcolumn align="right">{Postage}</TD><!--/COST-->
+                      <!--Delivery--><td class="datatd"></TD><!--/Delivery-->
+                      <!--PrinterOnly-->
+				<td class="datatd"></TD>
+				<td class="datatd"></TD>
+		      <!--/PrinterOnly-->
+					  <td></TD> 
+                    </tr>
+<!--/Postage-->
+<!--/ROW-->
+<!--COST-->
+              <TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>Cost of Items</b></TD><td class="DataTD" id="lastcolumn" align="right"><b>{totalcost}</b></TD></TR>
+              <!--HANDLING--><TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>Handling</b></TD><td class="DataTD" id="lastcolumn" align="right">{handling}</TD></TR><!--/HANDLING-->
+              <!--FREIGHT--><TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{FreightCaption}</b><!--CostCentreCostRuleCaption--><br>{CostCentreCostRuleCaption}<!--/CostCentreCostRuleCaption--></TD><td class="DataTD" id="lastcolumn" align="right" valign="top">{freight}</TD></TR><!--/FREIGHT-->
+			  <!--FREIGHTHANDLING--><TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{FreightCaption}</b><!--CostCentreCostRuleCaption--><br>{CostCentreCostRuleCaption}<!--/CostCentreCostRuleCaption--></TD><td class="DataTD" id="lastcolumn" align="right" valign="top">{freighthandling}</TD></TR><!--/FREIGHTHANDLING-->
+			  <!--DISCOUNT--><TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b><font color=ff0000>* Group Discount</font></b></TD><td class="DataTD" id="lastcolumn" align="right"><font color=ff0000>-{DiscountPrice}</font></TD></TR><!--/DISCOUNT-->
+              <!--TAX--><TR><td class="subtotalrow" id="firstcolumn" colspan="5" align="right"><b>Total excl. {TaxLabel}</b></TD><td class="subtotalrow" id="lastcolumn" align="right"><b>{subtotal}</b></TD></TR>
+              <TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>{TaxLabel}</b></TD><td class="DataTD" id="lastcolumn" align="right">{tax}</TD></TR><!--/TAX-->
+              <TR><td class="totalrow" id="firstcolumn" colspan="5" align="right"><b>Total {taxinc} <!--TAXLABEL-->{TaxLabel}<!--/TAXLABEL--></b></TD><td class="totalrow" id="lastcolumn" align="right"><b>{total}</b></TD></TR>
+<!--Paid-->
+              <TR><td class="DataTD" id="firstcolumn" colspan="5" align="right"><b>Total Payment</b></TD><td class="DataTD" id="lastcolumn" align="right"><b>{total}</b></TD></TR>
+              <TR><td class="totalrow" id="firstcolumn" colspan="5" align="right"><b>Balance Due</b></TD><td class="totalrow" id="lastcolumn" align="right"><b>{CurrencySymbol}0.00</b></TD></TR>
+<!--/Paid-->
+<!--/COST-->
+            </table>
+<!--/ORDERS-->
+<!--TabTableEnd-->
+    </td>
+    <td><img src="images/spacer.gif" width="20" height="1" border="0"></td>
+  </TR>
+  <tr><td valign="bottom" align="left" width="100%" colspan="3" height=5></td></tr>
+</table>
+</body>
+</html>

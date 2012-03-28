@@ -1,0 +1,115 @@
+<script>
+	$(function() {
+		$(".delete-order").click(function(event) {
+			if (!confirm("Are you sure you want to delete this order?")) {
+				event.preventDefault();
+			}
+		});
+
+		$(".new-window").click(function(event) {
+			event.preventDefault();
+
+			var height = 300;
+			var width = 450;
+
+			if ($(this).attr("data-height")) {
+				height = $(this).attr("data-height");
+			}
+
+			if ($(this).attr("data-width")) {
+				height = $(this).attr("data-width");
+			}
+
+			var left = (screen.width / 2) - (width / 2);
+			var top = (screen.height / 2) - (height / 2);
+
+			var resizable = "no";
+
+			if ($(this).attr("data-resizable")) {
+				resizable = $(this).attr("data-resizable");
+			}
+
+			var newWindow = window.open($(this).attr("href"), $(this).attr("title"), "left=" + left + ",top=" + top + ",height=" + height + ",width=" + width + ",menubar=no,toolbar=no,location=no,personalbar=no,status=no,resizable=" + resizable + ",scrollbars=no");
+
+			newWindow.focus();
+		});
+	});
+</script>
+<!--search-->
+<form id="orders-search" method="post" name="form1">
+	<label for="searchvalue">Search all orders for:</label>
+	<input id="searchvalue" name="searchvalue" type="text" value="{searchval}" />
+	<label for="searchorder">by</label>
+	<select id="searchorder" name="searchorder">
+		<!--CART--><option value="0">Cart #</option><!--/CART-->
+		<option value="1">Order #</option>
+		<!--PO--><option value="2">PO Number</option><!--/PO-->
+		<option value="3">Artwork Name</option>
+		<option value="4">Product</option>
+		<option value="5">Status</option>
+		<option value="6">{CostCentreCaption}</option>
+		<option value="7">Quantity</option>
+	</select>
+	<input name="btnSubmitorder" type="submit" value="Go" />
+	<a href="adorders.asp?all={all}">Advanced Search</a>
+</form>
+<!--<div id="search-results">
+{searchresults}
+</div>-->
+<!--/search-->
+<!--VIEWORDERS-->
+<table id="orders">
+	<thead>
+		<tr>
+			<th scope="col" class="order-date">Date</th>
+			<!--CART--><th scope="col" class="order-cart-number">Cart #</th><!--/CART-->
+			<th scope="col" class="order-item-number">Item #</th>
+			<!--PO--><th scope="col" class="order-po-number">PO #</th><!--/PO-->
+			<!--OrderCost--><th scope="col" class="order-cost">Cost</th><!--/OrderCost-->
+			<th scope="col" class="order-quantity">Quantity</th>
+			<th scope="col" class="order-product-name">Product Name</th>
+			<!--ShippingInfo--><th scope="col">Shipping Info</th><!--/ShippingInfo-->
+			<!--OrderedBy--><th scope="col">Ordered By</th><!--/OrderedBy-->
+			<!--status--><th scope="col" class="order-status">Status</th><!--/status-->
+			<th scope="col" class="order-preview">Preview</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!--ROW-->
+		<tr>
+			<td class="order-date">{Date}</td>
+			<!--CART--><td class="order-cart-number">{CartId}</td><!--/CART-->
+			<td class="order-item-number">{OrderNumber}</td>
+			<!--PO--><td class="order-po-number">{PONumber}</td><!--/PO-->
+			<!--OrderCostData--><td class="order-cost">{OrderCost}</td><!--/OrderCostData-->
+			<td class="order-quantity">{Quantity}</td>
+			<td class="order-product-name">{TemplateName}<!--ExtraOrderFields--></td>
+			<!--ShippingInfo--><td>{ShippingInfo}</td><!--/ShippingInfo-->
+			<!--OrderedBy--><td>{OrderedBy}</td><!--/OrderedBy-->
+			<!--status--><td class="order-status">{Status}</td><!--/status-->
+			<!--ViewMyOrder-->
+			<td class="order-preview">
+				<a href="ShowOrder.asp?Order={Order_Id}&load=1"><img src="Files/BrokerBranding/mc/Include/search.png" />View</a>
+                <!--VPrintDownload{Order_Id}-->
+				<!--ReOrder--><br /><a href="ShowReOrder.asp?Order={Order_Id}"><img src="Files/BrokerBranding/mc/Include/reorder.png" />Reorder</a><!--/ReOrder-->
+				<!--Remove--><br /><a href="Orders.asp?Type={type}&remove={Order_Id}" class="delete-order"><img src="Files/BrokerBranding/mc/Include/delete.png" />Remove</a><!--/Remove-->
+				<!--Quote2Order--><br /><a href="Quotes.asp?type=createorder&id={Order_Id}" class="new-window" title="quote2order"><img src="Files/BrokerBranding/mc/Include/reorder.png" />Create Order</a><!--/Quote2Order-->
+				<!--QuoteDelete--><br /><a href="Quotes.asp?type=deletequote&id={Order_Id}" class="new-window" title="quotedelete"><img src="Files/BrokerBranding/mc/Include/delete.png" />Delete Quote</a><!--/QuoteDelete-->
+				<!--Email--><br /><a href="ResendEmail.asp?id={Order_Id}" class="new-window" title="Resend Email" data-height="480" data-width="780" data-resizable="yes"><img src="Files/BrokerBranding/mc/Include/email.gif" />Resend Email</a><!--/Email-->
+			</td>
+			<!--/ViewMyOrder-->
+			<!--ViewOrder-->
+			<td>
+				<a href="showorder.asp?order={Order_Id}&admin=1&load=1" class="new-window" title="View Order" data-height="480" data-width="780" data-resizable="yes"><img src="Files/BrokerBranding/mc/Include/search.png" />View</a>
+			</td>
+			<!--/ViewOrder-->
+			<!--ViewNexJobOrder-->
+			<td>
+				<a href="ShowOrder.asp?Order={Order_Id}&admin=1&load=1"><img src="Files/BrokerBranding/mc/Include/search.png" />View</a>
+			</td>
+			<!--/ViewNexJobOrder-->
+		</tr>
+		<!--/ROW-->
+	</tbody>
+</table>
+<!--/VIEWORDERS-->

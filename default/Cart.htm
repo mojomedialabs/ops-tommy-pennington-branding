@@ -1,0 +1,417 @@
+<script src="include/ajax.js"></script>
+<SCRIPT SRC="include/validation.js" ID=clientEventHandlersJS LANGUAGE=javascript></SCRIPT>
+<link href="include/highslide-styles.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="include/highslide.js"></script>
+<script type="text/javascript" src="include/highslide.cfg.js"></script>  
+<script language="javascript" type="text/javascript">
+function stopRKey(evt) {
+  var evt = (evt) ? evt : ((event) ? event : null);
+  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+  if ((evt.keyCode == 13) && (node.type!="textarea"))  {return false;}
+}
+document.onkeypress = stopRKey;
+
+
+	function CheckLiveStock()
+	{
+		
+		var inputs = document.getElementsByTagName('input');
+		var Orders = '';
+		for (var i = 0; i < inputs.length; i++) {
+				if ((inputs[i].type == 'checkbox') && (inputs[i].name == 'chkOrder') ) 
+				{
+					if (inputs[i].checked) Orders = Orders + inputs[i].value + ','
+				}
+		}
+		Orders = Orders.substring(0,Orders.length-1);
+		
+		if(!AjaxGet("CheckLiveStockAjax.asp?Orders=" + Orders, AfterCheckStock, false))
+			{
+				alert("Browser doesn't support AJAX");
+			}  
+		if (xmlHttp.responseText=='OK')
+					return true;
+			else 
+			{
+			if (xmlHttp.responseText=='NOKCap')
+				{
+				alert('{Cart - Quantity Cap Error Return Cart}');
+				return false;
+				}
+			else 
+				{
+				alert('{Cart - Stock Level Error}');
+				return false;
+				}
+			}
+	}
+		
+	function AfterCheckStock()
+	{
+	return true;
+	}
+
+	function ShowDelOptions()
+	{
+		document.getElementById('modad').innerHTML = "";
+		document.getElementById('tabDelDetails').style.display = "";
+		document.getElementById('tabDelDetails2').style.display = "";
+	}
+
+	function ValidData()
+	{
+		var blnOk;
+		<!--oldDeliveryAddressLogic-->
+		blnOk = hasAddress();
+
+		if (blnOk)
+		{
+			blnOk = hasBillingAddress();
+		}
+		return blnOk;
+	}
+
+	function deleteOrder(strURL)
+	{
+		if (confirm("Are you sure you want to delete this order?"))
+		{
+			window.location = strURL
+		}
+	}
+
+	function ValidFreeAddress()
+	{
+		if ((document.Form1.Address1.value + document.Form1.Address2.value + document.Form1.Address3.value + document.Form1.Suburb.value + document.Form1.State.value + document.Form1.PostCode.value) == '')
+		{
+			return true;
+		}
+		else
+		{
+			if (document.Form1.Country.value == "IE")
+			{
+				if (((document.Form1.Address1.value + document.Form1.Address2.value + document.Form1.Address3.value) == '') || (document.Form1.Suburb.value == '') || (document.Form1.State.value == ''))
+				{
+					alert('Please enter a value for ' + document.getElementById("captionstreet").innerHTML.replace("&nbsp;", " ") + ', ' + document.getElementById("captionsuburb").innerHTML + ' and ' + document.getElementById("captionstate").innerHTML);
+					return false;
+				}
+				else
+				{
+					return true
+				}
+			} else
+			{
+				if (((document.Form1.Address1.value + document.Form1.Address2.value + document.Form1.Address3.value) == '') || (document.Form1.Suburb.value == '') || (document.Form1.State.value == '') || (document.Form1.PostCode.value == ''))
+				{
+					alert('Please enter a value for ' + document.getElementById("captionstreet").innerHTML.replace("&nbsp;", " ") + ', ' + document.getElementById("captionsuburb").innerHTML + ', ' + document.getElementById("captionstate").innerHTML + ' and ' + document.getElementById("captionpostcode").innerHTML);
+					return false;
+				}
+				else
+				{
+					return true
+				}
+			}
+			
+		}
+	}
+
+	function ValidFreeBillAddress()
+	{
+		if ((document.Form1.BillingAddress1.value + document.Form1.BillingAddress2.value + document.Form1.BillingAddress3.value + document.Form1.BillingSuburb.value + document.Form1.BillingState.value + document.Form1.BillingPostCode.value) == '')
+		{
+			return true;
+		}
+		else
+		{
+
+			if (((document.Form1.BillingAddress1.value + document.Form1.BillingAddress2.value + document.Form1.BillingAddress3.value) == '') || (document.Form1.BillingSuburb.value == '') || (document.Form1.BillingState.value == '') || (document.Form1.BillingPostCode.value == ''))
+			{
+				alert('Please enter a value for Billing ' + document.getElementById("captionstreet").innerHTML.replace("&nbsp;", " ") + ', ' + document.getElementById("captionsuburb").innerHTML + ', ' + document.getElementById("captionstate").innerHTML + ' and ' + document.getElementById("captionpostcode").innerHTML);
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+
+	function HasFreeAddress()
+	{
+		return ((document.Form1.Address1.value + document.Form1.Address2.value + document.Form1.Address3.value + document.Form1.Suburb.value + document.Form1.State.value + document.Form1.PostCode.value != ''))
+	}
+
+	function HasFreeBillAddress()
+	{
+		if (document.Form1.BillingAddress1 != "")
+		{
+		return ((document.Form1.BillingAddress1.value + document.Form1.BillingAddress2.value + document.Form1.BillingAddress3.value + document.Form1.BillingSuburb.value + document.Form1.BillingState.value + document.Form1.BillingPostCode.value != ''))
+		}
+	}
+
+	function HasStatAddress()
+	{
+		return (document.Form1.DelAddrStat.checked)
+	}
+
+	function HasDefAddress()
+	{
+		return (document.Form1.DeliveryAddress.value != '')
+	}
+
+	function HasDefBillAddress()
+	{
+		if (document.Form1.BillingAddress1 != ''){
+		return (document.Form1.BillingAddress.value != '')
+		}
+	}
+
+	checked=true;
+
+	function checkDispatchProfile(intDispatchProfile_Id) {
+		var inputs = document.getElementsByTagName('input');
+			for (var i = 0; i < inputs.length; i++) {
+				if ((inputs[i].type == 'checkbox') && (inputs[i].size == intDispatchProfile_Id)) {
+					if (inputs[i].checked)
+						inputs[i].checked = false
+					else
+						inputs[i].checked = true
+					;
+				}
+			}
+	}
+
+
+
+	function checkAll() {
+		var inputs = document.getElementsByTagName('input');
+			 if (checked == false)
+			  {
+			   checked = true
+			  }
+			else
+			  {
+			  checked = false
+			  }
+			for (var i = 0; i < inputs.length; i++) {
+				if (inputs[i].type == 'checkbox') {
+					inputs[i].checked = checked;
+				}
+			}
+	}
+
+	function AddToCarts()
+	{
+		var strURL="";
+		var strOrders="";
+		var strDelim="";
+		
+		if(document.Form1.chkOrder.length > 1){
+			for (i=0; i<document.Form1.chkOrder.length; i++){
+				if (document.Form1.chkOrder[i].checked==true) {
+					strOrders = strOrders + strDelim + document.Form1.chkOrder[i].value;
+					strDelim = ",";
+				}
+			}
+		}
+		else{
+			if (document.Form1.chkOrder.checked==true) {
+				strOrders = strOrders + document.Form1.chkOrder.value;
+			}
+		}
+		strURL = "AdminCopyOrders.asp?OrderIds=" + strOrders + "&cc={CC}";
+		window.location = strURL;
+	}
+
+	function getPromotion(strCode)
+	{
+		if (document.getElementById("promocode").value == "")
+		{
+			alert("Please enter a promocode to apply.");
+		} else {
+			document.getElementById("applypromotion").disabled = true;
+			document.getElementById("applypromotion").value = "Checking...";
+
+			if(!AjaxGet("Promotions.asp?check=1&code=" + strCode + "&cc={CC}", ApplyPromo))
+			{
+				document.getElementById("promotion").innerHTML = "Browser doesn't support AJAX";
+			}
+		}
+	}
+
+	function ApplyPromo() 
+	{
+		var aryVal
+		if (xmlHttp.readyState==4)
+		{
+			document.getElementById("applypromotion").disabled = false;
+			document.getElementById("applypromotion").value = "Apply";
+
+			if(xmlHttp.responseText == "")
+			{
+				if (document.getElementById("promocode").value == "")
+				{
+					document.getElementById("promotion").innerHTML="";
+				} else {
+					document.getElementById("promotion").innerHTML="Promotion [" + document.getElementById("promocode").value + "] not found";
+				}
+				document.getElementById("promocode").value = "";
+			} else {
+				window.location =  "Promotions.asp?code=" + xmlHttp.responseText + "&cc={CC}"
+			}
+		}
+	}
+</script>
+
+<div style="visibility: hidden; position: absolute; filter:alpha(opacity=85); -moz-opacity:0.85; opacity: 0.85; z-index: 1; top: 5px; left: 5px; width:300px;" id="help_popup"> 
+<IFRAME id="frTest" style="z-index:-1;width:300px;height:100;position:absolute;top:0;left:0;display:inline;" frameborder=0 scrolling=no marginwidth=0 src="" marginheight=0></iframe>
+  <table class="bordertable" width="300">
+    <tr><td class=bordertableheader id="help_header"></td></tr>
+    <tr><td id="help_body"></td></tr>
+  </table>
+</div>
+
+<!--ORDERS-->
+	<!--TabTableStart-->
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+		<!--Budget-->
+                  <table border="0" cellpadding="0" cellspacing="0" class="wrapper">
+                  	<tr><td width="100" valign="top"><b>{allowancetime}&nbsp;Allowance:&nbsp;</b></td><td>{allowance}</td></tr>
+                  	<tr><td width="100" valign="top"><b>Current&nbsp;Balance:</b></td><td>{balance}</td></tr>
+                  	<tr><td width="100" valign="top"><b>Available&nbsp;Balance:</b></td><td>{availablebalance}<br><br></td></tr>
+		  </table>
+		<!--/Budget-->
+
+                  <form action="Checkout.asp" method="post" name="Form1" onSubmit="return ValidData()">
+                  <input type="hidden" name="cc" value="{CC}">
+                  <table border="0" cellpadding="10" cellspacing="0" class="wrapper">
+                    <tr>
+                      <TD align="left" class="tableheader" nowrap><input type='checkbox' checked="true" name='checkall' onclick='checkAll(Form1);'></td>
+                      <TD align="left" class="tableheader" nowrap>Item #</td>
+                      <TD align="left" class="tableheader">Date</td>
+                      <TD align="left" class="tableheader">Qty</td>
+                      <TD align="left" class="tableheader">Name</td>
+                      <TD align="left" class="tableheader">Product</td>
+					  <!--PromotionCode--><TD align="left" class="tableheader">Promocode</td><!--/PromotionCode-->
+                      <!--PreApproval--><TD align="left" class="tableheader">Approver's Email</td><!--/PreApproval-->
+					  <!--BudgetAllocation--><TD align="left" class="tableheader" align="right">Allocated to Budget</td><!--/BudgetAllocation-->
+                      <!--COST--><TD align="left" class="tableheader" align="right">Cost</td><!--/COST-->
+                      <!--Delivery--><TD align="left" class="tableheader">Delivery</td><!--/Delivery-->
+                      <TD align="left" class="tableheader" nowrap>Actions</td>
+                    </tr>
+<!--DispatchProfileRow-->
+                    <tr>
+                      <TD align="left" nowrap>&nbsp;</td>
+                      <TD align="left" nowrap colspan="99">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <TD align="left" class="tableheader" nowrap><input type='checkbox' checked="true" name='checkdispatchprofile' onclick='checkDispatchProfile({DispatchProfile_Id});'></td>
+                      <TD align="left" class="tableheader" nowrap colspan="99">{DispatchProfileCaption}</td>
+                    </tr>
+<!--/DispatchProfileRow-->					
+<!--ROW-->
+                    <tr>
+                      <td id=firstcolumn class="datatd" nowrap="nowrap"><!--CheckBox{Order_Id}--><input type=checkbox name=chkOrder value="{Order_Id}"  size="{DispatchProfile_Id}"<!--check-->><!--/CheckBox{Order_Id}--><!--ErrorMessage{Order_Id}--><a href="#" onmouseover="showhelp('{WarningTitle{Order_Id}}', '{WarningMessage{Order_Id}}',event, true);" onmouseout="showhelp('','',event,false);"><IMG src="images/exclamation.gif" border=0></a><!--/ErrorMessage{Order_Id}--></td>
+                      <td class="datatd">{OrderNumber}</td>
+                      <td class="datatd">{Date}</td>
+                      <td class="datatd">{Quantity}</td>
+                      <td class="datatd">{EmpName}</td>
+                      <td class="datatd" nowrap>{TemplateName}<!--ExtraOrderFields--></td>
+					  <!--PromotionCode--><td class="datatd" nowrap>{PromoCode}</td><!--/PromotionCode-->
+                      <!--PreApproval--><td class="datatd">{PreApprovalEmail}</td><!--/PreApproval-->
+					  <!--BudgetAllocation--><td class="datatd" align="right"><input id="allocatetobudget{Order_Id}" name="allocatetobudget{Order_Id}" size="5" type="text" value="{AllocatedToBudget}"></td><!--/BudgetAllocation-->
+                      <!--COST--><td class="datatd" align="right">{Discount{Order_Id}} {Cost}</td><!--/COST-->
+                      <!--Delivery--><td class="datatd">{Address}</td><!--/Delivery-->
+                      <td id=lastcolumn class="datatd" nowrap align="center"><a href="ShowOrder.asp?Order={Order_Id}&load=1"><img src="images/view.gif" border=0 alt="view / edit item"></a>&nbsp;
+					  <a href="CartItemEdit.asp?order={Order_Id}&cc={CC}" id="hsfileattachment" onclick="return hs.htmlExpand(this, { outlineType: 'rounded-white',
+						wrapperClassName: 'highslide-wrapper', objectType: 'iframe', preserveContent: false, width:400} )"
+						class="highslide"><img src="images/delete.gif" border="0" alt="remove item" style="border:none;"></a>
+                      </td>
+                    </tr>
+<!--Postage-->
+					<tr>
+                      <td id=firstcolumn class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+					  <td class="datatd" colspan="2" align="right">Postage</td>
+                      <!--PreApproval--><td class="datatd"></td><!--/PreApproval-->
+					  <!--BudgetAllocation--><td class="datatd"></td><!--/BudgetAllocation-->
+                      <!--COST--><td class="datatd" align="right">{Postage}</td><!--/COST-->
+                      <!--Delivery--><td class="datatd"></td><!--/Delivery-->
+                      <td id="lastcolumn" class="datatd" nowrap align="center"></td>
+                    </tr>
+<!--/Postage-->
+<!--PurchaseListPrice-->
+					<tr>
+                      <td id=firstcolumn class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+                      <td class="datatd"></td>
+					  <td class="datatd" colspan="2" align="right">Purchase List Price</td>
+                      <!--PreApproval--><td class="datatd"></td><!--/PreApproval-->
+                      <!--BudgetAllocation--><td class="datatd"></td><!--/BudgetAllocation-->
+					  <!--COST--><td class="datatd" align="right">{PurchaseListPrice}</td><!--/COST-->
+                      <!--Delivery--><td class="datatd"></td><!--/Delivery-->
+                      <td id=lastcolumn class="datatd" nowrap align="center"></td>
+                    </tr>
+<!--/PurchaseListPrice-->
+<!--/ROW-->
+<!--DISCOUNT-->
+					<tr>
+					  <!--PreApproval--><TD align="left" class="datatd"></td><!--/PreApproval-->
+                      <TD colspan=7 class="datatd" id=firstcolumn align=right><font color=#ff0000>* Group Discount</font></td>                      
+                      <!--COST--><TD class="datatd" align="right"><font color=ff0000>{DiscountPrice}</font></td><!--/COST-->
+                      <!--Delivery--><TD align="left" class="datatd"></td><!--/Delivery-->
+                      <TD align="left" class="datatd" nowrap></td>
+                    </tr>
+<!--/DISCOUNT-->
+
+
+<!--FreightOptions-->
+                    <tr><td colspan=11>
+			<br>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="bordertable">
+			  <tr><td colspan="2" class="bordertableheader"><b>Freight Options</b></td></tr>
+			  
+			  <tr>
+			    <TD class="TextBoxText" width=200>Requires Saturday Delivery</td>
+			    <TD class="TextBoxText" align=left><input type=checkbox class=textboxtext Name=FreightSaturday></td>
+			  </tr>
+			  <tr>
+			    <TD class="TextBoxText" width=200>Delivery to Residential Address</td>
+			    <TD class="TextBoxText" align=left><input type=checkbox class=textboxtext Name=FreightResidential></td>
+			  </tr>
+			  <tr>
+			    <TD class="TextBoxText" width=200>Delivery Confirmation</td>
+			    <TD class="TextBoxText" align=left><SELECT name="FreightConfirmation" class="TextBoxText"><OPTION Value=1>None</OPTION><OPTION Value=2>Signature Required</OPTION><OPTION Value=3>Adult Signature Required</OPTION></SELECT></td>
+			  </tr>
+			</table>
+                    </td></tr>
+<!--/FreightOptions-->
+					<!--PromotionCode--><tr><td colspan=7 align=right><span id=promotion style="color: red;"></span>&nbsp;&nbsp;&nbsp;Promotion Code: <input type=text name=promocode id=promocode onBlur="getPromotion(document.getElementById('promocode').value)" size=10></td><td colspan=2><input type=button id=applypromotion value="Apply" onClick="getPromotion(document.getElementById('promocode').value)"></td></TR><!--/PromotionCode-->
+					<tr><td colspan=11><!--ModifyAddress-->
+					<!--DeliveryScreenTip--><table width='100%' id='tabDelDetails2' {DeliveryDisplayStyle} {DeliveryDisplayStyle2}><tr><td class=textboxtext colspan=3><blockquote>{DeliveryHelpText}</blockquote></td></tr></table><!--/DeliveryScreenTip-->
+					<!--DeliveryAddresses--></td></tr>
+                    <tr><td align="right" colspan=11><!--Login--></td></tr>
+<!--UPSFEDEX-->
+				<tr><td colspan=11>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="bordertable">
+			  <tr><td colspan="2" class="bordertableheader"><b>Freight Method</b></td></tr>
+			  <tr>
+			    <TD class="TextBoxText" width=200><!--UPSFEDEXSELECT--><!--/UPSFEDEXSELECT--></td>
+			  </tr>
+			 </table>
+<!--/UPSFEDEX-->
+                    <tr><td colspan=11>
+					<input type=hidden name="EditInCart" id="EditInCart" Value="{EditInCart}">
+					<input type=hidden name="AllocateBudget" id="AllocateBudget" Value="{AllocateBudget}">
+			<input type="button" id=btncontinueshopping value="Continue Shopping" onClick="javascript:window.location='cIndex.asp'">&nbsp;
+			<!--AddToCarts--><input type="button" id="btnaddtocarts" value="Add to other Carts" onClick="javascript:AddToCarts();">&nbsp;<!--/AddToCarts-->
+			<!--Checkout--><input type="submit" value="Checkout >>" id=btnCheckout name=btnCheckout {checkoutdisabled}  onClick="return CheckLiveStock();" ><!--/Checkout-->
+		    </td></tr>
+                  </table>
+		</form>
+	<!--TabTableEnd-->
+<!--/ORDERS-->

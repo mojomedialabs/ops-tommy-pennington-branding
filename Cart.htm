@@ -1,0 +1,167 @@
+<div id="alert-message">
+	<div id="alert-message-title"></div>
+	<div id="alert-message-body"></div>
+</div>
+<div id="confirm-remove-item">
+	<a href="#" id="close-confirm-remove-item"><img src="Files/BrokerBranding/mcpro/Include/close.png" alt="Close" title="Close" /></a>
+	<input type="button" id="btnsave" value="Place in Saved Orders" data-order-id="" data-cc="" /> <input type="button" id="btnaddtocarts" value="Remove from Order" data-order-id="" data-cc="" />
+</div>
+<!--ORDERS-->
+<!--Budget-->
+<div id="budget">
+	<div id="allowance">
+		Allowance: {allowance}
+	</div>
+
+	<div id="current-balance">
+		Current Balance: {balance}
+	</div>
+	<div id="available-balance">
+		Available Balance: {availablebalance}
+	</div>
+</div>
+<!--/Budget-->
+<form action="checkout.asp" id="Form1" method="post" name="Form1">
+	<input id="cc" name="cc" type="hidden" value="{CC}" />
+	<table id="cart">
+		<thead>
+			<tr>
+				<th scope="col" class="cart-checkbox"><input checked="true" id="checkall" name="checkall" type="checkbox" /></th>
+				<th scope="col" class="cart-item-number">Item #</th>
+				<th scope="col" class="cart-date">Date</th>
+				<th scope="col" class="cart-quantity">Quantity</th>
+				<th scope="col" class="cart-product-name">Product Name</th>
+				<!--PromotionCode--><th scope="col">Promocode</th><!--/PromotionCode-->
+				<!--PreApproval--><th scope="col">Approver's Email</th><!--/PreApproval-->
+				<!--BudgetAllocation--><th scope="col">Allocated to Budget</th><!--/BudgetAllocation-->
+				<!--COST--><th scope="col" class="cart-cost">Cost</th><!--/COST-->
+				<!--Delivery--><th scope="col">Delivery</th><!--/Delivery-->
+				<th scope="col" class="cart-actions">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!--DispatchProfileRow-->
+			<tr>
+				<td><input checked="true" id="checkdispatchprofile" name="checkdispatchprofile" type="checkbox" data-dispatch-profile-id="{DispatchProfile_Id}" /></td>
+				<td colspan="0">{DispatchProfileCaption}</td>
+			</tr>
+			<!--/DispatchProfileRow-->
+			<!--ROW-->
+			<tr>
+				<td class="cart-checkbox">
+					<!--CheckBox{Order_Id}-->
+					<input name="chkOrder" size="{DispatchProfile_Id}" type="checkbox" value="{Order_Id}" <!--check--> />
+					<!--/CheckBox{Order_Id}-->
+					<!--ErrorMessage{Order_Id}-->
+					<a href="#" class="show-alert-message" data-alert-message-title="{WarningTitle{Order_Id}}" data-alert-message-body="{WarningMessage{Order_Id}}" data-alert-message-class="error"><img src="Files/BrokerBranding/mc/Include/error.png" /></a>
+					<!--/ErrorMessage{Order_Id}-->
+				</td>
+				<td class="cart-item-number">{OrderNumber}</td>
+				<td class="cart-date">{Date}</td>
+				<td class="cart-quantity">{Quantity}</td>
+				<td class="cart-product-name">{TemplateName}<!--ExtraOrderFields--></td>
+				<!--PromotionCode--><td>{PromoCode}</td><!--/PromotionCode-->
+				<!--PreApproval--><td>{PreApprovalEmail}</td><!--/PreApproval-->
+				<!--BudgetAllocation--><td><input id="allocatetobudget{Order_Id}" name="allocatetobudget{Order_Id}" size="5" type="text" value="{AllocatedToBudget}"></td><!--/BudgetAllocation-->
+				<!--COST--><td class="cart-cost">{Discount{Order_Id}} {Cost}</td><!--/COST-->
+				<!--Delivery--><td>{Address}</td><!--/Delivery-->
+				<td class="cart-actions">
+					<a href="ShowOrder.asp?Order={Order_Id}&amp;load=1"><img src="Files/BrokerBranding/mcpro/Include/search.png" alt="View/Edit Item" title="View/Edit Item" /></a>
+					<a href="#" class="remove-item" data-order-id="{Order_Id}" data-cc="{CC}"><img src="Files/BrokerBranding/mcpro/Include/delete.png" alt="Remove Item" title="Remove Item" /></a>
+				</td>
+			</tr>
+			<!--Postage-->
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td colspan="2">Postage</td>
+				<!--PreApproval--><td></td><!--/PreApproval-->
+				<!--BudgetAllocation--><td></td><!--/BudgetAllocation-->
+				<!--COST--><td>{Postage}</td><!--/COST-->
+				<!--Delivery--><td></td><!--/Delivery-->
+				<td></td>
+			</tr>
+			<!--/Postage-->
+			<!--PurchaseListPrice-->
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td colspan="2">Purchase List Price</td>
+				<!--PreApproval--><td></td><!--/PreApproval-->
+				<!--BudgetAllocation--><td></td><!--/BudgetAllocation-->
+
+				<!--COST--><td>{PurchaseListPrice}</td><!--/COST-->
+				<!--Delivery--><td></td><!--/Delivery-->
+				<td></td>
+			</tr>
+			<!--/PurchaseListPrice-->
+			<!--/ROW-->
+		</tbody>
+	</table>
+	<!--DISCOUNT-->
+	<div id="discount">
+		* Group Discount: {DiscountPrice}
+	</div>
+	<!--/DISCOUNT-->
+	<!--FreightOptions-->
+	<div id="freight-options">
+		<p>Freight Options</p>
+		<p>
+			<label for="FreightSaturday">Requires Saturday Delivery</label><br />
+			<input id="FreightSaturday"  name="FreightSaturday" type="checkbox">
+		</p>
+		<p>
+			<label for="FreightResidential">Delivery to Residential Address</label><br />
+			<input id="FreightResidential"  name="FreightResidential" type="checkbox">
+		</p>
+		<p>
+			<label for="FreightConfirmation">Delivery Confirmation</label><br />
+			<select id="FreightConfirmation" name="FreightConfirmation">
+				<option value="1">None</option>
+				<option value="2">Signature Required</option>
+				<option value="3">Adult Signature Required</option>
+			</select>
+		</p>
+	</div>
+	<!--/FreightOptions-->
+	<!--PromotionCode-->
+	<div id="promotion-code">
+		<p id="promotion"></p>
+		<p>
+			<label for="promocode">Promotion Code:</label><br />
+			<input id="promocode" name="promocode" size="10" type="text" />
+		</p>
+		<p>
+			<input id="applypromotion" name="applypromotion" type="button" value="Apply" data-cc="{CC}" />
+		</p>
+	</div>
+	<!--/PromotionCode-->
+	<div id="delivery">
+		<!--DeliveryAddresses-->
+	</div>
+	<div id="login">
+		<!--Login-->
+	</div>
+	<!--UPSFEDEX-->
+	<div id="upsfedex">
+		<p>Freight Method</p>
+		<!--UPSFEDEXSELECT--><!--/UPSFEDEXSELECT-->
+	</div>
+	<!--/UPSFEDEX-->
+	<input id="EditInCart" name="EditInCart" type="hidden" value="{EditInCart}" />
+	<input id="AllocateBudget" name="AllocateBudget" type="hidden" value="{AllocateBudget}" />
+	<input id="btncontinueshopping" type="button" value="Continue Shopping" />
+	<!--AddToCarts--><input id="btnaddtoothercarts" value="Add to other Carts"  type="button" data-cc="{CC} "/><!--/AddToCarts-->
+	<!--Checkout--><input id="btnCheckout" name="btnCheckout" type="submit" value="Checkout" {checkoutdisabled} /><!--/Checkout-->
+</form>
+<!--/ORDERS-->
+<script src="include/ajax.js"></script>
+<script src="include/validation.js"></script>
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/cart.js"></script>
+<script>
+	LoadAddresses();
+</script>

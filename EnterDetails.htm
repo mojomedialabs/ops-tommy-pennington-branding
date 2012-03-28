@@ -1,0 +1,79 @@
+<script src="include/validation.js"></script>
+<script>
+	function validateField(curInput) {
+		<!--validateField-->
+		<!--visibleField-->
+	}
+
+	function validateForm() {
+		<!--validateSubmit-->
+		<!--validateForm-->
+		return true;
+	}
+
+	function hasValue(strName) {
+		<!--hasvalue-->
+		return true;
+	}
+
+	function validateLoad() {
+		<!--validateLoad-->
+		return true;
+	}
+
+	function ShowThumb(cboxCur, intIndex) {
+		<!--ImageJava-->
+	}
+
+	function limitText(limitField, limitNum) {
+		if (limitField.value.length > limitNum) {
+			limitField.value = limitField.value.substring(0, limitNum);
+			document.getElementById(limitField.id + "MaxChars").innerHTML = "<br />-Max Characters Reached-";
+		} else {
+			document.getElementById(limitField.id + "MaxChars").innerHTML = "";
+		}
+	}
+</script>
+<script src="include/enterdetailsval.js"></script>
+<form action="Step3New.asp{params}" method="post" name="Form1" id="Form1" onSubmit="return validateForm();">
+	<input type="hidden" name="hidreturnto" id="hidreturnto" value="{returnto}" />
+	<h1>{Name}</h1>
+	<!--TabTableStart-->
+		<!--Details-->
+			<!--ProofTop-->
+				<div id="spnFrontProof">
+					<!--FrontThumb-->
+						{FrontThumb}
+					<!--/FrontThumb-->
+				</div>
+				<div id="spnBackProof">
+					<!--BackThumb-->
+						{BackThumb}
+					<!--/BackThumb-->
+				</div>
+				<!--LiveProof-->
+					<div id="spnLiveProof">
+					</div>
+					<input type="button" value="Refresh Preview" name="btnPreview" id="btnPreview" onClick="return RefreshProof();" />
+				<!--/LiveProof-->
+			<!--/ProofTop-->
+			<!--GroupHeader-->
+				<!--<h2>{Caption}</h2>-->
+			<!--/GroupHeader-->
+			<!--FieldLayout-->
+				<div class="enter-details-field">
+					<label for="{FieldCaption}">{FieldCaption}</label>
+					<br />
+					{FieldCaptionOptions}{Field}
+				</div>
+			<!--/FieldLayout-->
+		<!--/Details-->
+		<!--BUTTONS-->
+			<div id="enter-details-buttons">
+					<input type="button" name="btnCancel" id="btnCancel" value="Cancel" />
+					<input type="submit" name="btnSubmit" id="btnSubmit" value="Next" />
+			</div>
+		<!--/BUTTONS-->
+	<!--TabTableEnd-->
+</form>
+<script src="http://host.onlineprintsolutions.com/rosegroup/Files/BrokerBranding/mcpro/include/enterdetails.js"></script>

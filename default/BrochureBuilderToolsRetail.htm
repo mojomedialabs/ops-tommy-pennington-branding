@@ -1,0 +1,694 @@
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+
+var colourPickerType;
+var strTextToolsDisplay="";
+var imageScaleFactor = "{imageScaleFactor}";
+var blnDPILimit = {dpiLimit};
+
+function setup()
+{
+	if (parent.zoompercent != undefined && parent.zoompercent != "")
+	{
+		document.getElementById("zoompercent").value = parent.zoompercent;
+		document.getElementById("pagezoom").value = parent.zoompercent + "%";
+	}else{
+		document.getElementById("pagezoom").value = "100%";
+	}
+	
+	//<!--VWebControls-->
+	//document.getElementById("spanimagevideo").innerHTML = "Image/Video/Graphs";
+	//document.getElementById("spanimagevideo").innerHTML = "Image/Video";
+	//<!--/VWebControls-->
+}
+
+function getScaleFactor()
+{
+	return parent.ibmain.dblScaleFactor;
+}
+
+function setbg(imgCur, strImage)
+{
+	imgCur.src = strImage;
+}
+
+
+function setFunction(action) {
+	if((action != "setSelection") || (!document.all))
+	{
+		var flashMovie=getFlashMovieObject();
+
+		flashMovie.SetVariable("/:actionType", action);		
+	}
+}
+
+function setFunctionValue(action, value) {
+	var flashMovie=getFlashMovieObject();
+
+	flashMovie.SetVariable("/:actionValue", value);
+	flashMovie.SetVariable("/:actionType", action);	
+}
+
+function getFlashMovieObject()
+{
+   if (navigator.appName.indexOf("Microsoft Internet")!=-1)
+   {
+     return parent.ibmain.window.BrochureBuilder;
+   }
+   else
+   {
+     return parent.ibmain.window.document.BrochureBuilder;
+   }
+}
+
+
+
+function AddElementControl(strName, strText, strValue)
+{
+	document.getElementById(strName).options[document.getElementById(strName).length] = new Option(strText,strValue);
+}
+
+function setImageScale(value, blnFlash) {
+	var strValue = "";
+	var userPercent = "";
+	var flashPercent = "";
+
+	var percent = value.replace('%', '');
+
+	if(blnFlash)
+	{
+		flashPercent = percent;
+		userPercent = getUserPercent(percent);
+	} else
+	{
+		flashPercent = getFlashPercent(percent);
+		userPercent = percent;
+	}
+
+	//image scale restriction
+	if(blnDPILimit && !getDPIIgnore())
+	{
+		if(userPercent > 100)
+		{
+			flashPercent = getFlashPercent(100);
+			userPercent = 100;
+			setFunctionValue("imagescalechange", flashPercent);
+			document.getElementById("divDPILimit").style.display = "";
+		} else {
+			document.getElementById("divDPILimit").style.display = "none";
+		}
+	}
+
+	document.getElementById("imagezoom").value = userPercent + "%";
+	return setFunctionValue("imagescalechange", flashPercent);
+}
+
+function getDPIIgnore()
+{
+	if (parent.ibmain.window.strIgnoreDPILimit == "yes")
+	{
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function setImageScaleEnter(event) {
+	var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+
+	if (keyCode == 13)
+	{
+		setImageScale(document.getElementById("imagezoom").value);
+		document.getElementById("imagezoom").blur();
+	}
+}
+
+function zoomImage(value)
+{
+	var percent = document.getElementById("imagezoom").value.replace('%', '');
+
+	percent = parseFloat(percent) + parseFloat(value);
+	setImageScale(percent + '');
+}
+
+function getFlashPercent(value)
+{
+	return Math.round(value / imageScaleFactor) / getScaleFactor();
+}
+
+function getUserPercent(value)
+{
+	return Math.round(value * imageScaleFactor) * getScaleFactor();
+}
+
+function getFlashFont(value)
+{
+	var fontSize = Math.round(value / getScaleFactor());
+
+	return fontSize;
+}
+
+function getUserFont(value, blnFlash)
+{
+	var fontSize;
+
+	if(blnFlash)
+	{
+		fontSize = value;
+	}else{
+		fontSize = getFlashFont(value);
+	}
+
+	fontSize = fontSize * getScaleFactor();
+	if(fontSize == 0) fontSize = getScaleFactor();
+	return fontSize;
+}
+
+function setPageScale(value) {
+	var i = value.indexOf("%");
+	var myInteger = value;
+
+	if (i == -1)
+	{
+		if (!isInteger(value)) return false;
+	} else
+	{
+		myInteger = value.substring(0, i)
+		if (!isInteger(myInteger)) return false
+	}
+
+
+	return setFunctionValue("zoomchange", myInteger);
+}
+
+function setPageScaleEnter(event) {
+	var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+	var value = document.getElementById("pagezoom").value;
+
+	if (keyCode == 13)
+	{
+		var i = value.indexOf("%");
+		var myInteger = value;
+
+		if (i == -1)
+		{
+			if (!isInteger(value)) return false;
+		} else
+		{
+			myInteger = value.substring(0, i)
+			if (!isInteger(myInteger)) return false
+		}
+
+		document.getElementById("pagezoom").blur();
+		//getFlashMovieObject().focus();
+		return setZoom(myInteger);
+	}
+
+
+}
+
+function setFontSize(value)
+{
+	var aryParse;
+	var strFontSize;
+	var flashFontSize, userFontSize;
+
+	aryParse = value.split(".");
+
+	strFontSize = aryParse[0];
+
+	if(isInteger(strFontSize))
+	{		
+		flashFontSize = getFlashFont(strFontSize);
+		if(flashFontSize > 127)
+		{
+			flashFontSize = 127;
+			userFontSize = getUserFont(127, true);
+		} else {
+			userFontSize = getUserFont(strFontSize, false);
+		}
+
+		document.getElementById("fontSize1").value=userFontSize;
+
+		setFunctionValue("formattext", "fontSize,"+flashFontSize);
+	}
+
+	document.getElementById("fontSize1").blur();
+	//getFlashMovieObject().focus();
+}
+
+function setFontSizeEnter(event)
+{
+	var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+	if (keyCode == 13)
+	{
+		setFontSize(document.getElementById("fontSize1").value);
+	}
+}
+
+function isInteger (s)
+
+{   var i;
+    var intStart;
+
+    intStart = 0;
+
+    if (isWhitespace(s)) 
+       if (isInteger.arguments.length == 1) return false;
+       else return (isInteger.arguments[1] == true);
+
+    if (s.length > 1)
+    {
+      if (s.charAt(i)=="-"){intStart=1}
+    }
+    for (i = intStart; i < s.length; i++)
+    {   
+        var c = s.charAt(i);
+
+        if (!isDigit(c)) return false;
+    }
+
+    return true;
+}
+
+function isWhitespace (strCurrent)
+
+{   var i;
+	var whitespace = " \t\n\r";
+	
+    if (isEmpty(strCurrent)) return true;
+
+    for (i = 0; i < strCurrent.length; i++)
+    {   
+        var c = strCurrent.charAt(i);
+
+        if (whitespace.indexOf(c) == -1) return false;
+    }
+    
+    return true;
+}
+
+function isDigit (c)
+{   return ((c >= "0") && (c <= "9"))
+}
+
+function isEmpty(strCurrent)
+{  
+	return ((strCurrent == null) || (strCurrent.length == 0))
+}
+
+function ZoomIn()
+{
+  document.getElementById("flashTD").setAttribute('width', document.getElementById("flashTD").getAttribute('width') + 10);
+  document.getElementById("flashTD").setAttribute('height', document.getElementById("flashTD").getAttribute('height') + 10);
+}
+  
+function changeTemplate(objTemplate, blnProject)
+{
+	if (blnProject)
+	{
+		parent.document.location.href = "ImageBuilder.asp?pid={pid}&page={page}&order={order}&templateid=" + objTemplate.options[objTemplate.selectedIndex].value;
+	} else 
+	{
+		parent.document.location.href = "ImageBuilder.asp?stat_id={statid}&order={order}&templateid=" + objTemplate.options[objTemplate.selectedIndex].value;
+	}
+}
+
+function changeZoom(intAmount)
+{
+
+	document.getElementById("zoompercent").value = parseFloat(document.getElementById("zoompercent").value) + parseFloat(intAmount);
+	document.getElementById("pagezoom").value = document.getElementById("zoompercent").value + "%"
+
+	return parent.ibmain.SetZoom(parseFloat(document.getElementById("zoompercent").value));	
+}
+
+function setZoom(intAmount)
+{
+	document.getElementById("zoompercent").value = parseFloat(intAmount)
+	document.getElementById("pagezoom").value = parseFloat(intAmount) + "%";
+	
+	return parent.ibmain.SetZoom(parseFloat(document.getElementById("zoompercent").value));	
+}
+
+function setText()
+{
+	setFunctionValue("settext", document.getElementById("flid").value + "," + editor_getHTML("htmltext"));
+}
+
+function popup(strURL, strWidth, strHeight)
+{
+	var winCurrent;
+	winCurrent = window.open(strURL, "", "width=" + strWidth + ",height=" + strHeight + ",toolbar=0,status=0,location=0,menubar=0,scrollbars=1,resizable=1");
+	winCurrent.focus(); 
+}
+
+function mouseOverColour(strColour)
+{
+  document.getElementById("mainColour").setAttribute('bgColor', "#" + strColour);
+}
+
+function toggleBGColour()
+{
+	setFunction("setSelection");
+	colourPickerType="bgcolour";
+	strTextToolsDisplay=document.getElementById("textFunctions").style.display;
+	parent.frames["ibmain"].addTools("colourFunctions");
+}
+
+function groupCanvas()
+{
+	parent.ibmain.toggleGroupCanvas();
+}
+
+
+function toggleTab(strTab)
+{
+	if(document.getElementById("textFunctions")) document.getElementById("textFunctions").style.display = "none";
+	document.getElementById("imageFunctions").style.display = "none";
+	document.getElementById("layerFunctions").style.display = "none";
+	if(document.getElementById("webFunctions")) document.getElementById("webFunctions").style.display = "none";
+	if(document.getElementById("pageFunctions"))document.getElementById("pageFunctions").style.display = "none";
+	document.getElementById("themeFunctions").style.display = "none";
+	document.getElementById("textTab").className = "buttonTabOff";
+	document.getElementById("imageTab").className = "buttonTabOff";
+	document.getElementById("layerTab").className = "buttonTabOff";
+	if(document.getElementById("webTab")) document.getElementById("webTab").className = "buttonTabOff";
+	if(document.getElementById("pageTab"))document.getElementById("pageTab").className = "buttonTabOff";
+	document.getElementById("themeTab").className = "buttonTabOff";
+
+	document.getElementById(strTab + "Functions").style.display = "";
+	document.getElementById(strTab + "Tab").className = "buttonTabOn";
+
+	if(strTab == "text")
+	{
+		if(document.getElementById("fontSizeDiv").style.display == "") parent.frames["ibmain"].setFontPosition();
+	} else {
+		document.getElementById("fontSizeDiv").style.display="none";
+	}
+}
+
+function pageURLSelect(box)
+{
+	document.getElementById("url").value = box[box.selectedIndex].value;
+}
+
+function cancelOrder()
+{
+	if(confirm("Are you sure you want to cancel?\nAll changes will be lost"))
+	{
+		parent.window.location.href = parent.window.document.referrer;	
+	}
+}
+
+function gotoPage(intPage)
+{
+	setFunctionValue("gotopage", intPage);
+}
+
+function addPage(intPage)
+{
+	var objCell = document.getElementById("pageSelectorRow").insertCell(-1);
+	objCell.innerHTML = "<div class=pageitem onclick='gotoPage(" + intPage + ")'>" + intPage + "</div>";
+}
+
+function applyTheme(strTheme)
+{
+	//{ThemeJS}
+}
+
+function OpenWin(strName)
+{
+	var winCur
+	winCur = window.open(strName,"","width=470,height=350,toolbar=0,status=0,location=0,menubar=0,scrollbars=0,resizable=1");
+	winCur.focus(); 
+}
+
+</SCRIPT>
+
+<div style="display:none;position:absolute;left:0px;top:0px;z-index=1;" id=fontSizeDiv><iframe style="z-index:-1;width:33px;height:15px;position:absolute;top:0;left:0;display:inline;" frameborder=0 scrolling=no marginwidth=0></iframe><input type=text name=fontSize1 id=fontSize1 size=3 maxlength=3 onClick='javascript:setFunction("setSelection"); this.focus();' onKeyPress="return setFontSizeEnter(event);" onChange="setFontSize(this.value);"></div>
+
+<table border=0 cellpadding=3 cellspacing=1>
+<tr valign=top><td>
+<table border=0 cellpadding=0 cellspacing=0>
+<tr valign=top>
+		<td>
+			<table border=0 cellpadding=0 cellspacing=0 class=nonTabTable>
+			  <tr valign=top>
+				<td height=52>
+					<table border=0 cellpadding=0 cellspacing=0>
+						<tr>
+							<td height=40>
+								<table border=0 cellpadding=0 cellspacing=0 width=100% height=40>
+									<tr>
+										<td align=left class=BottomBar><IMG src="bbimages/pointer.png" LANGUAGE=javascript onmousedown='javascript:setFunction("selectImage")'></td><td class=BottomBar><a href="javascript:setFunction('selectImage');" class="BtnLnk">SELECT</a></td><td></td>
+										<td align=right class=BottomBar><img src=images/spacer.gif width=3><IMG src="images/delete.gif" LANGUAGE=javascript onmousedown='javascript:setFunction("delete")'></td><td class=BottomBar><a href="javascript:setFunction('delete');" class="BtnLnk">DELETE</a>
+										<!--VWebControls-->
+										<td id=pagebackground class=BottomBar><img src=images/spacer.gif width=3><a href='javascript:colourPickerType="pagebackground";parent.frames["ibmain"].addTools("colourFunctions");'><IMG src="bbimages/ed_color_bg.gif" border=0></a></td><td class=BottomBar id=draw1><a href='javascript:colourPickerType="pagebackground";parent.frames["ibmain"].addTools("colourFunctions");' class="BtnLnk">PAGE</a></td>
+										<!--/VWebControls-->
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td height=40>
+								<table border=0 cellpadding=0 cellspacing=0 width=100% height=40>
+									<tr>
+										<!--<td class=BottomBar><a href="javascript:setFunction('zoomInTool')"><img src="bbimages/magzoomin.jpg" alt="zoom tool" border=0></a></td>-->
+										<td class=BottomBar><a href="javascript:parent.frames['ibmain'].FitHeight();"><IMG src="bbimages/fitheight.jpg" LANGUAGE=javascript onmouseover="setbg(this, 'bbimages/fitheightselected.jpg')" onmouseout="setbg(this, 'bbimages/fitheight.jpg')" alt="Fit Page Height" border="0"></a></td>
+										<td class=BottomBar><a href="javascript:parent.frames['ibmain'].FitWidth();"><IMG src="bbimages/fitwidth.jpg" LANGUAGE=javascript onmouseover="setbg(this, 'bbimages/fitwidthselected.jpg')" onmouseout="setbg(this, 'bbimages/fitwidth.jpg')" alt="Fit Page Width" border="0"></a></td>
+										<td class=BottomBar><a href="javascript:changeZoom(-25);"><IMG src="bbimages/minus.jpg" border=0></a></td>
+										<td class=BottomBar><input name=pagezoom id=pagezoom value="100%" size=4 onChange='return setZoom(this.value)' onKeyPress="return setPageScaleEnter(event)"><input type=hidden name=zoompercent id=zoompercent value=100></td>
+										<td class=BottomBar><a href="javascript:changeZoom(25);"><IMG src="bbimages/plus.jpg" border=0></a></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr id="spanTheme" style="display:{spanThemeDisplay}">
+							<td height="22" nowrap="nowrap">
+									<!--Theme--><div style="float:left; display:inline;">{ThemeGroupName}&nbsp;<SELECT onChange='applyTheme(this.options[this.selectedIndex].value);' class=selTheme><OPTION></OPTION><!--ThemeOption--><OPTION VALUE="{ThemeId}" {selected}>{ThemeName}</OPTION><!--/ThemeOption--></SELECT>&nbsp;</div><!--/Theme-->										
+							</td>
+						</tr>
+					</table>
+				</td>
+			  </tr>
+			</table>
+		</td>
+</tr>
+</table>
+</td>
+<td>
+<table border=0 cellpadding=0 cellspacing=0 height="82">
+	<tr>
+		<td colspan=3 valign=top>
+			<table border=0 cellpadding=0 cellspacing=0>
+				<tr>
+					<td><img src=images/spacer.gif width=114 height=0></td>
+					<td><img src=images/spacer.gif width=114 height=0></td>
+					<td><img src=images/spacer.gif width=114 height=0></td>
+					<!--VWebControls--><td><img src=images/spacer.gif width=114 height=0></td><!--/VWebControls-->
+					<td><img src=images/spacer.gif width=114 height=0></td>
+					<td width=100%><img src=images/spacer.gif width=0 height=0></td>
+				</tr>
+				<tr>
+					<td class=buttonTabOff id=themeTab style="display:{themeTabDisplay}"><a href='#' onClick='toggleTab("theme");'>Themes</a></td>
+					<td class=buttonTabOn id=textTab><a href='#' onClick='toggleTab("text");'>Text</a></td>
+					<td class=buttonTabOff id=imageTab><a href='#' onClick='toggleTab("image");' class=menulinkoff><span id=spanimagevideo>Image<!--&nbsp;&&nbsp;Graphs--></span></a></td>
+					<td class=buttonTabOff id=layerTab><a href='#' onClick='toggleTab("layer");' class=menulinkoff>Layering&nbsp;&&nbsp;Tools</a></td>
+					<!--VWebControls--><td class="buttonTabOff" id="webTab"><a href='#' onClick='toggleTab("web");' class="menulinkoff">Form&nbsp;Fields</a></td><!--/VWebControls-->
+					<!--<td class=buttonTabOff id=pageTab><a href='#' onClick='toggleTab("page");' class=menulinkoff>Managers</a></td>-->
+					<td class=buttonTabSpacer width=100%>&nbsp;</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td id=themeFunctions style="display:none" class=menuBoxItem>
+		  <table border=0 cellpadding=0 cellspacing=0 height="52">
+		      <tr>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				<td valign=top height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52 width="100%">
+						<tr align=left valign=middle height=50% width="100%">	
+							<td width=100%>
+							 <table border=0 cellpadding=3 cellspacing=0 width=100%>
+								<tr height=100%>
+									<td>{ThemeMultiple}</td>
+								</tr>
+							  </table>
+							</td>
+							<td><img src=images/spacer.gif width=1></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		  </table>
+		</td>
+		<td id=textFunctions class=menuBoxItem>
+		  <table border=0 cellpadding=0 cellspacing=0 height="52">
+		      <tr>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				<td valign=top height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52 width="100%">
+						<tr align=left valign=middle height=50% width="100%">	
+                                                  <td width=100%>
+                                                     <table border=0 cellpadding=3 cellspacing=0 width=100%>
+							<tr height=100%>
+							  <td id=addtext align=center><a href='javascript:parent.ibmain.getDocumentXY("addtext", "")'  class="BtnLnk"><IMG id=addtext1 src="bbimages/addtext.jpg" border=0  alt='Add Text Box'><br>Add&nbsp;Text</a></td>
+  							  <td style="display:none" id=textstylebold width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "bold");setFunction("setSelection");'><IMG id=bold src="bbimages/ed_format_bold.gif" border=0></a></td>
+  							  <td style="display:none" id=textstyleitalic width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "italic");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_format_italic.gif" border=0></a></td>
+							  <td style="display:none" id=textstyleunderline width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "underline");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_format_underline.gif" border=0></a></td>
+							  <td style="display:none" id=textalignmentleft width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "left");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_align_left.gif" border=0></a></td>
+							  <td style="display:none" id=textalignmentcentre width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "center");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_align_center.gif" border=0></a></td>
+							  <td style="display:none" id=textalignmentright width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "right");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_align_right.gif" border=0></a></td>
+							  <!--<td class=LeftRightBar colspan=9 height="40"><SELECT NAME="textfields" size=4 id="textfields" onChange='return parent.ibmain.getTextXY("settextxy", this.options[this.selectedIndex].value)'>{Fields}</SELECT></td>-->
+
+							  <td style="display:none" id=textfontselection><select onClick='javascript:setFunction("setSelection");' onchange="javascript:setFunction('setSelection');setFunctionValue('changeFont', this.options[this.selectedIndex].value); this.selectedIndex=0;setFunction('setSelection');" name=fontFamily id=fontFamily>{fonts}</select></td>
+							  <td style="display:none" id=textsize><select name=fontSize id=fontSize style="width:50px" onClick='javascript:setFunction("setSelection");' onChange='javascript:if(this.options[this.selectedIndex].value != ""){setFunction("setSelection");setFunctionValue("formattext", "fontSize,"+this.options[this.selectedIndex].value); document.getElementById("fontSize1").value=this.options[this.selectedIndex].text; this.selectedIndex=0;}'>{fontsizes}</select></td>
+							  <td style="display:none" id=textcolour>&nbsp;<a href='javascript:setFunction("setSelection");colourPickerType="text";parent.frames["ibmain"].addTools("colourFunctions");'><IMG id=addtext src="bbimages/ed_color_fg.gif" border=0></a></td>
+							  <td style="display:none" id=texthyperlink>&nbsp;<a href='javascript:setFunction("setSelection");parent.frames["ibmain"].addTools("hyperlinkFunctions");'><IMG id=addtext src="images/ed_link.gif" border=0></a></td>
+							  <td style="display:none" id=font><img src=spacer width=1 height=40></td>
+							  <td style="display:none" id=textstyleincleading width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "increaseleading");setFunction("setSelection");'><IMG id=addtext src="bbimages/leadinginc.gif" border=0></a></td>
+							  <td style="display:none" id=textstyledecleading width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "decreaseleading");setFunction("setSelection");'><IMG id=addtext src="bbimages/leadingdec.gif" border=0></a></td>
+							  <!--<td id=textbullet width="14%"><a href='javascript:setFunction("setSelection");setFunctionValue("formattext", "bullet");setFunction("setSelection");'><IMG id=addtext src="bbimages/ed_list_bullet.gif" border=0></a></td>-->
+							  <!--<td id=link><img src=images/spacer.gif width=10><a href='javascript:setFunction("setLinkBoxes")'><IMG src="images/ed_link.gif" border=0></a></td><td id=link1><a href='javascript:setFunction("setLinkboxes")' class="BtnLnk">LINK TEXT BOX</a></td>-->
+                                                        </tr>
+                                                      </table>
+                                                    </td>
+                                                    <td><img src=images/spacer.gif width=1></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		  </table>
+		</td>
+		<td id=imageFunctions style="display:none" class=menuBoxItem>
+		  <table border=0 cellpadding=0 cellspacing=0 height="52" width=100%>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				  
+				<td height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52>
+						<tr>
+							<td height=40>
+								<table border=0 cellpadding=0 cellspacing=0 height=100% width=100%>
+									<tr>
+										<td  height=35 id=addimage><a href='javascript:parent.ibmain.getDocumentXY("addimage", "")' class="BtnLnk"><img src="bbimages/ibcamera2.jpg" width=38 border=0></a></td><td id=addimage1><a href='javascript:parent.ibmain.getDocumentXY("addimage", "")' class="BtnLnk">INSERT IMAGE</a></td>
+										<!--<td  height=35 id=addimage><a href='javascript:parent.ibmain.blnOpenGraph=true;parent.ibmain.getDocumentXY("addimage", "")' class="BtnLnk"><img src="bbimages/graph.jpg" width=38 border=0></a></td><td id=addimage1><a href='javascript:parent.ibmain.blnOpenGraph=true;parent.ibmain.getDocumentXY("addimage", "")' class="BtnLnk">INSERT GRAPH</a></td>-->                                        
+										<!--<td align="right"><img src=images/spacer.gif width=5><a href='#' class="BtnLnk" onClick='parent.ibmain.getDocumentXY("addimageboxtype", "", "webimage")'><img src="bbimages/ibcamera2.jpg" width=38 border=0></a></td><td><a href='javascript:parent.ibmain.getDocumentXY("addimageboxtype", "", "webimage")' class="BtnLnk">WEB IMAGE</a></td>-->
+                                        					<!--VWebControls--><!--<td align="right"><img src=images/spacer.gif width=5><a href='javascript:parent.ibmain.getDocumentXY("addimageboxtype", "", "video")' class="BtnLnk"><img src="bbimages/ibmovie2.jpg" width=40 border=0></a></td><td id=draw1><a href='javascript:parent.ibmain.getDocumentXY("addimageboxtype", "", "video")' class="BtnLnk">VIDEO</a></td>--><!--/VWebControls-->
+										<td><IMG id=pagefit src="bbimages/fitheight.jpg" LANGUAGE=javascript onmousedown='return setFunction("fitImageHeight")' onmouseover="setbg(this, 'bbimages/fitheightselected.jpg')" onmouseout="setbg(this, 'bbimages/fitheight.jpg')" alt="Fit Image Height"></td>
+										<td><IMG id=pagefit src="bbimages/fitwidth.jpg" LANGUAGE=javascript onmousedown='return setFunction("fitImageWidth")' onmouseover="setbg(this, 'bbimages/fitwidthselected.jpg')" onmouseout="setbg(this, 'bbimages/fitwidth.jpg')" alt="Fit Image Width"></td>
+										<td><IMG id=pagefit src="bbimages/minus.jpg" LANGUAGE=javascript onmousedown='zoomImage(-2);'></td>
+										<td><input id=imagezoom name=imagezoom value="100%" size=4 onChange='return setImageScale(this.value)' onKeyPress="return setImageScaleEnter(event)"></td>
+										<td><IMG id=pagefit src="bbimages/plus.jpg" LANGUAGE=javascript onmousedown='zoomImage(2);'></td>
+										<td><a href=# onClick='setFunction("moveImage")'><img src="bbimages/moveimage.jpg" border=0></a></td>
+										<td><div class="dpiWarning" id="divDPILimit" style="display:none">Maximum zoom reached for acceptable print Quality. Upload larger image to zoom further</div></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			  </tr>
+			</table>
+		</td>
+		<td id=layerFunctions style="display:none" class=menuBoxItem>
+		  <table border=0 cellpadding=0 cellspacing=0 height="52">
+		      <tr>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				<td valign=top height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52>
+						<tr align=left valign=middle>
+							<td align=right><IMG id=addtext src="bbimages/ed_to_back.gif" LANGUAGE=javascript onmousedown='javascript:setFunction("toBack")'></td>
+							<td><IMG id=addtext src="bbimages/ed_to_front.gif" LANGUAGE=javascript onmousedown='javascript:setFunction("toFront")'></td>
+							<td><IMG id=addtext src="bbimages/ed_send_backward.gif" LANGUAGE=javascript onmousedown='javascript:setFunction("moveBackward")'></td>
+							<td><IMG id=addtext src="bbimages/ed_bring_forward.gif" LANGUAGE=javascript onmousedown='javascript:setFunction("moveForward")'></td>
+							<td id=groupalignmentleft><a href='javascript:setFunctionValue("alignblock", "left");'><IMG id=addtext src="bbimages/groupleft.gif" border=0></a></td>
+							<td id=groupalignmentcentre><a href='javascript:setFunctionValue("alignblock", "centre");'><IMG id=addtext src="bbimages/groupcenter.gif" border=0></a></td>
+							<td id=groupalignmentright><a href='javascript:setFunctionValue("alignblock", "right");'><IMG id=addtext src="bbimages/groupright.gif" border=0></a></td>
+							<!--<td id="duplicate1"><img src=images/spacer.gif width=2><a href='javascript:setFunction("copy");'><IMG id=addtext src="bbimages/ed_copy.gif" border=0></a></td><td id="duplicate" colspan=2><a href="javascript:setFunction('copy');" class="BtnLnk">DUPLICATE</a></td>-->
+							<td id=textbgcolour><a href='javascript:toggleBGColour();'><IMG id=addtext src="bbimages/ed_color_bg.gif" border=0></td>
+							<td id=rotate><a href='javascript:setFunction("rotate");'><IMG id=addtext src="bbimages/rotate.gif" border=0></a><img src=images/spacer.gif width=10 border=0></td>
+							<td id=linkboxes><a href='javascript:setFunction("setLinkBoxes");'><IMG id=addtext src="images/ed_link.gif" border=0></a><img src=images/spacer.gif width=10 border=0></td>
+							<td id=draw><a href='javascript:parent.ibmain.getDocumentXY("addbox", "")'><TABLE border=0 width=10 height=10 bgcolor='ff0000'><tr><td></td></tr></table></a></td><td id=draw1><a href='javascript:parent.ibmain.getDocumentXY("addbox", "")' class="BtnLnk">COLORED BOX</a></td>
+							<td><img src=images/spacer.gif width=10><a href="javascript:setFunction('grid')"><img src="bbimages/grid.jpg" alt="grid" border=0></a></td><td align=right><a href="javascript:setFunction('grid')"  class="BtnLnk">GRID</a><td><img src=images/spacer.gif width=10><a href="javascript:setFunction('outline')"><img src="bbimages/outline.gif" alt="grid" border=0></a></td><td align=right><a href="javascript:setFunction('outline')"  class="BtnLnk">OUTLINE</a></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		  </table>
+		</td>
+		<td id="webFunctions" style="display:none" class="menuBoxItem">
+		  <table border=0 cellpadding=0 cellspacing=0 height="52">
+		      <tr>
+
+                                <td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+                                <td>
+				    <table border=0 cellpadding=0 cellspacing=0 height=52>
+                                      <tr>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/textbox.jpg"></td><td id=draw1><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "textbox")' class="BtnLnk">TEXT BOX</a></td>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/dropdown.jpg"></td><td id=draw1><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "selectbox")' class="BtnLnk">DROP BOX</a></td>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/multiline.jpg"></td><td id=draw1><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "multiline")' class="BtnLnk">MULTI LINE</a></td>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/check.jpg"></td><td><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "checkbox")' class="BtnLnk">CHECK BOX</a></td>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/radio.jpg"></td><td><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "radio")' class="BtnLnk">RADIO BUTTON</a></td>
+                                        <td align="right"><img src=images/spacer.gif width=10><img src="bbimages/button.jpg"></td><td><a href='javascript:parent.ibmain.getDocumentXY("addformfield", "", "button")' class="BtnLnk">BUTTON</a></td>
+                                      </tr>
+                                    </table>
+                                </td>
+			</tr>
+		  </table>
+		</td>
+		<td id=drawingFunctions style="display:none">
+		  <table width=100% border=0 cellpadding=0 cellspacing=0 height="52">
+			<tr>
+			  	<td></td><td class=Strip valign=top>&nbsp;::&nbsp;DRAWING&nbsp;ITEM</td></tr>
+			  </tr>
+		      <tr>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				<td valign=top height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52>
+						<tr align=left valign=middle>							
+							<td class="LeftRightBar"><a href='javascript:colourPickerType="drawingcolour";parent.frames["ibmain"].addTools("colourFunctions");'><IMG id=addtext src="bbimages/ed_color_bg.gif" border=0></td>
+						</tr>
+						<tr>
+							<td class="LeftRightBar">WEIGHT&nbsp;<select onchange="javascript:setFunctionValue('drawingWeight', this.options[this.selectedIndex].text);" name=weight id=weight><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>10</option><option>12</option><option>15</option><option>20</option></select></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		  </table>
+		</td>
+		<!--<td id=pageFunctions style="display:none" class=menuBoxItem>
+		  <table border=0 cellpadding=0 cellspacing=0 height="52">
+		      <tr>
+				<td><img src="images/spacer.gif" width=5 height={toolsheight}></td>
+				<td valign=top height=52>
+					<table border=0 cellpadding=0 cellspacing=0 height=52>
+						<tr align=left valign=middle>
+							<td align=right><input type=button onclick="setFunction('displayPageManager')" value=" Page Manager ">&nbsp;<input type=button onclick="groupCanvas()" value=" Live Session "></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		  </table>
+		</td>-->
+	</tr>
+	<!--<tr><td height=1 class=Strip  colspan=10></td></tr>-->
+</table>
+</td>
+<td>
+	<table border=0 cellpadding=0 cellspacing=0 height="104">
+		<tr height=46>
+			<td><img src="images/spacer.gif" width=5 height=1></td>
+			<td align="center" id=pageSelector style='display:none'><div class='pageselector'><table cellpadding=0 cellspacing=0 border=0><tr id=pageSelectorRow></tr></table></div></td>
+		</tr>
+		<tr height=100% valign=top>
+			<td><img src="images/spacer.gif" width=5></td>
+			<td align="center">
+			<input type=button onclick="cancelOrder()" value=" << Cancel " name="btnCancel" id="btnCancel">&nbsp;
+			<!--SaveControl--><!--<input type=button value="Save in your profile" title="Save in your profile" onclick="OpenWin('GCSave.asp?tid={tid}&pid={pid}')">&nbsp;--><!--/SaveControl-->
+			<input type=button onclick="this.disabled=true;this.value='Generating...';setFunctionValue('submit', '{finishurl}')" value="  Loading... " name=btnSubmit id=btnSubmit disabled></td>
+		</tr>
+	</table>
+</td>
+</tr>
+</table>
