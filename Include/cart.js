@@ -131,7 +131,7 @@ $(function() {
 
 			$("#confirm-remove-item").show();
 
-			$("#confirm-remove-item").offset({ top: $(this).offset().top - 50, left: $(this).offset().left - 100 });
+			$("#confirm-remove-item").offset({ top: $(this).offset().top - 30, left: $(this).offset().left - 100 });
 		}
 	});
 
